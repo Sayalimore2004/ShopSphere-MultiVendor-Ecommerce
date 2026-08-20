@@ -63,6 +63,7 @@ ShopSphere-MultiVendor-Ecommerce/
 │   ├── script.js
 │   ├── vendors.js
 │   ├── store.js
+│   ├── product-details.js
 │   ├── login.js
 │   ├── register.js
 │   ├── profile.js
