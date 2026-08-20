@@ -1,0 +1,516 @@
+/* =========================================================
+   SHOPSPHERE
+   SELLER PAGE
+========================================================= */
+
+
+/* =========================================================
+   1. MAIN PAGE
+========================================================= */
+
+.seller-page {
+    min-height: 70vh;
+
+    background-color: #f8f9fa;
+}
+
+
+/* =========================================================
+   SELLER HERO
+========================================================= */
+
+.seller-hero {
+    padding: 65px 30px;
+
+    background-color: #dfe4ea;
+
+    color: #111827;
+
+    border-bottom: 1px solid #d1d5db;
+}
+
+.seller-hero-content {
+    max-width: 850px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.seller-label {
+    margin: 0 0 12px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    color: #4b5563;
+}
+
+.seller-hero h1 {
+    margin: 0 auto 16px;
+
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.seller-hero p:not(.seller-label) {
+    max-width: 650px;
+
+    margin: 0 auto 26px;
+
+    font-size: 16px;
+    line-height: 1.6;
+
+    color: #374151;
+}
+
+.seller-primary-button {
+    display: inline-block;
+
+    padding: 12px 24px;
+
+    border: 1px solid #111827;
+    border-radius: 6px;
+
+    background-color: #111827;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.seller-primary-button:hover {
+    background-color: #374151;
+
+    transform: translateY(-2px);
+}
+/* =========================================================
+   3. BENEFITS SECTION
+========================================================= */
+
+.seller-benefits {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 60px 30px;
+}
+
+
+/* Section Header */
+
+.seller-section-header {
+    margin-bottom: 30px;
+
+    text-align: center;
+}
+
+.seller-section-header h2 {
+    margin: 0 0 8px;
+
+    font-size: 30px;
+
+    line-height: 1.2;
+
+    color: #111827;
+}
+
+.seller-section-header p {
+    margin: 0;
+
+    font-size: 15px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   BENEFIT GRID
+========================================================= */
+
+.seller-benefit-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+/* Benefit Card */
+
+.seller-benefit-card {
+    padding: 28px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.seller-benefit-card:hover {
+    transform: translateY(-4px);
+
+    border-color: #d1d5db;
+
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, 0.07);
+}
+
+
+/* Benefit Icon */
+
+.seller-benefit-icon {
+    width: 58px;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin: 0 auto 16px;
+
+    border-radius: 50%;
+
+    background-color: #f3f4f6;
+
+    font-size: 27px;
+}
+
+
+/* Benefit Heading */
+
+.seller-benefit-card h3 {
+    margin: 0 0 8px;
+
+    font-size: 18px;
+
+    color: #111827;
+}
+
+
+/* Benefit Description */
+
+.seller-benefit-card p {
+    margin: 0;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   4. SELLER FORM SECTION
+========================================================= */
+
+.seller-form-section {
+    padding: 10px 30px 70px;
+
+    background-color: #f8f9fa;
+}
+
+
+/* Form Card */
+
+.seller-form-card {
+    max-width: 650px;
+
+    margin: 0 auto;
+
+    padding: 32px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.04);
+}
+
+
+/* Form Header */
+
+.seller-form-header {
+    margin-bottom: 22px;
+}
+
+.seller-form-header h2 {
+    margin: 0 0 7px;
+
+    font-size: 25px;
+
+    color: #111827;
+}
+
+.seller-form-header p {
+    margin: 0;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   5. FORM GROUP
+========================================================= */
+
+.seller-form-group {
+    margin-bottom: 17px;
+}
+
+
+/* Labels */
+
+.seller-form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+/* Inputs & Select */
+
+.seller-form-group input,
+.seller-form-group select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    color: #222222;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* Input Focus */
+
+.seller-form-group input:focus,
+.seller-form-group select:focus {
+    border-color: #111827;
+
+    box-shadow:
+        0 0 0 3px rgba(17, 24, 39, 0.06);
+}
+
+
+/* =========================================================
+   6. MESSAGE
+========================================================= */
+
+.seller-message {
+    display: none;
+
+    margin: 15px 0;
+
+    padding: 11px 13px;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+/* Success */
+
+.seller-message.success {
+    display: block;
+
+    background-color: #f0f8f0;
+
+    border: 1px solid #c8dfcc;
+
+    color: #286b2f;
+}
+
+
+/* Error */
+
+.seller-message.error {
+    display: block;
+
+    background-color: #fff1f1;
+
+    border: 1px solid #f0caca;
+
+    color: #a12626;
+}
+
+
+/* =========================================================
+   7. SUBMIT BUTTON
+========================================================= */
+
+.seller-submit-button {
+    width: 100%;
+
+    padding: 12px 20px;
+
+    border: 1px solid #111827;
+
+    border-radius: 6px;
+
+    background-color: #111827;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.seller-submit-button:hover {
+    background-color: #374151;
+
+    transform: translateY(-1px);
+}
+
+.seller-submit-button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   8. TABLET
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .seller-hero {
+        padding: 55px 25px;
+    }
+
+    .seller-hero h1 {
+        font-size: 36px;
+    }
+
+    .seller-hero p:not(.seller-label) {
+        font-size: 15px;
+    }
+
+
+    .seller-benefits {
+        padding: 50px 25px;
+    }
+
+
+    .seller-benefit-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .seller-form-section {
+        padding: 10px 20px 60px;
+    }
+
+}
+
+
+/* =========================================================
+   9. MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .seller-hero {
+        padding: 50px 20px;
+    }
+
+    .seller-label {
+        font-size: 11px;
+
+        letter-spacing: 1.5px;
+    }
+
+    .seller-hero h1 {
+        font-size: 30px;
+    }
+
+    .seller-hero p:not(.seller-label) {
+        font-size: 15px;
+    }
+
+
+    .seller-primary-button {
+        width: 100%;
+
+        box-sizing: border-box;
+
+        text-align: center;
+    }
+
+
+    .seller-benefits {
+        padding: 45px 20px;
+    }
+
+
+    .seller-section-header h2 {
+        font-size: 26px;
+    }
+
+
+    .seller-form-card {
+        padding: 25px 20px;
+    }
+
+}

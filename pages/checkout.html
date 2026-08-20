@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ShopSphere | Checkout</title>
+
+    <link 
+    rel="stylesheet" 
+    href="../css/style.css"
+>
+
+<link 
+    rel="stylesheet" 
+    href="../css/checkout.css"
+>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="site-header">
+
+        <div class="header-container">
+
+            <div class="logo">
+
+                <a href="../index.html">
+                    ShopSphere
+                </a>
+
+            </div>
+
+
+            <div class="search-container">
+
+                <form action="#" method="get">
+
+                    <label for="header-search">
+                        Search products
+                    </label>
+
+                    <input
+                        type="search"
+                        id="header-search"
+                        name="search"
+                        placeholder="Search products, brands and more..."
+                    >
+
+                    <button type="submit">
+                        Search
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <nav class="main-navigation">
+
+                <a href="../index.html">
+                    Home
+                </a>
+
+                <a href="products.html">
+                    Products
+                </a>
+
+                <a href="vendors.html">
+                    Sellers
+                </a>
+
+                <a href="about.html">
+                    About
+                </a>
+
+                <a href="contact.html">
+                    Contact
+                </a>
+
+            </nav>
+
+
+            <div class="header-actions">
+
+                <a
+                    href="login.html"
+                    class="login-link"
+                >
+                    Login
+                </a>
+
+                <a
+                    href="cart.html"
+                    class="cart-link"
+                >
+                    Cart
+                </a>
+
+                <a
+                    href="seller.html"
+                    class="seller-button"
+                >
+                    Start Selling
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         MAIN CHECKOUT
+    ====================================================== -->
+
+    <main class="checkout-page">
+
+
+        <section class="checkout-header">
+
+            <div class="breadcrumb">
+
+                <a href="../index.html">
+                    Home
+                </a>
+
+                <span>/</span>
+
+                <a href="cart.html">
+                    Cart
+                </a>
+
+                <span>/</span>
+
+                <span>
+                    Checkout
+                </span>
+
+            </div>
+
+
+            <h1>
+                Checkout
+            </h1>
+
+            <p>
+                Complete your details to place your order.
+            </p>
+
+        </section>
+
+
+
+        <section class="checkout-content">
+
+
+            <!-- =================================================
+                 LEFT SIDE
+            ================================================== -->
+
+            <div class="checkout-left">
+
+
+                <!-- DELIVERY INFORMATION -->
+
+                <section class="checkout-card">
+
+                    <div class="checkout-card-header">
+
+                        <span class="checkout-step">
+                            1
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                Delivery Information
+                            </h2>
+
+                            <p>
+                                Enter the address where you want
+                                your order delivered.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        id="checkout-form"
+                        class="checkout-form"
+                    >
+
+
+                        <!-- FULL NAME -->
+
+                        <div class="form-group">
+
+                            <label for="full-name">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="full-name"
+                                name="fullName"
+                                placeholder="Enter your full name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="example@gmail.com"
+                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- PHONE -->
+
+                        <div class="form-group">
+
+                            <label for="phone">
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                placeholder="Enter 10-digit mobile number"
+                                inputmode="numeric"
+                                pattern="[0-9]{10}"
+                                maxlength="10"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- ADDRESS -->
+
+                        <div class="form-group">
+
+                            <label for="address">
+                                Address
+                            </label>
+
+                            <textarea
+                                id="address"
+                                name="address"
+                                rows="3"
+                                placeholder="House / Flat No., Street, Area"
+                                required
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- CITY + STATE -->
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="city">
+                                    City
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="city"
+                                    name="city"
+                                    placeholder="City"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="state">
+                                    State
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="state"
+                                    name="state"
+                                    placeholder="State"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PIN CODE -->
+
+                        <div class="form-group">
+
+                            <label for="pincode">
+                                PIN Code
+                            </label>
+
+                            <input
+                                type="text"
+                                id="pincode"
+                                name="pincode"
+                                placeholder="6-digit PIN code"
+                                inputmode="numeric"
+                                pattern="[0-9]{6}"
+                                maxlength="6"
+                                required
+                            >
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             PAYMENT METHOD
+                        ================================================== -->
+
+                        <section class="checkout-card payment-card">
+
+                            <div class="checkout-card-header">
+
+                                <span class="checkout-step">
+                                    2
+                                </span>
+
+                                <div>
+
+                                    <h2>
+                                        Payment Method
+                                    </h2>
+
+                                    <p>
+                                        Choose how you would like to pay.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="payment-options">
+
+
+                                <!-- =================================================
+                                     UPI
+                                ================================================== -->
+
+                                <label class="payment-option">
+
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="upi"
+                                        checked
+                                    >
+
+                                    <span class="payment-option-content">
+
+                                        <strong>
+                                            UPI
+                                        </strong>
+
+                                        <small>
+                                            Pay using UPI apps
+                                        </small>
+
+                                    </span>
+
+                                </label>
+
+
+
+                                <!-- =================================================
+                                     UPI APP DETAILS
+                                ================================================== -->
+
+                                <div
+                                    id="upi-details"
+                                    class="payment-details"
+                                >
+
+                                    <h3 class="payment-details-title">
+                                        Choose your UPI app
+                                    </h3>
+
+
+                                    <div class="upi-app-options">
+
+
+                                        <!-- GOOGLE PAY -->
+
+                                        <label class="upi-app-option">
+
+                                            <input
+                                                type="radio"
+                                                name="upi-app"
+                                                value="google-pay"
+                                                checked
+                                            >
+
+                                            <img
+                                                src="../images/google-pay.jpg"
+                                                alt="Google Pay"
+                                                class="upi-app-icon"
+                                            >
+
+                                            <span class="upi-app-name">
+                                                Google Pay
+                                            </span>
+
+                                        </label>
+
+
+
+                                        <!-- PHONEPE -->
+
+                                        <label class="upi-app-option">
+
+                                            <input
+                                                type="radio"
+                                                name="upi-app"
+                                                value="phonepe"
+                                            >
+
+                                            <img
+                                                src="../images/phonepe.jpg"
+                                                alt="PhonePe"
+                                                class="upi-app-icon"
+                                            >
+
+                                            <span class="upi-app-name">
+                                                PhonePe
+                                            </span>
+
+                                        </label>
+
+
+
+                                        <!-- PAYTM -->
+
+                                        <label class="upi-app-option">
+
+                                            <input
+                                                type="radio"
+                                                name="upi-app"
+                                                value="paytm"
+                                            >
+
+                                            <img
+                                                src="../images/paytm.jpg"
+                                                alt="Paytm"
+                                                class="upi-app-icon"
+                                            >
+
+                                            <span class="upi-app-name">
+                                                Paytm
+                                            </span>
+
+                                        </label>
+
+
+
+                                        <!-- OTHER UPI -->
+
+                                        <label class="upi-app-option">
+
+                                            <input
+                                                type="radio"
+                                                name="upi-app"
+                                                value="other"
+                                            >
+
+                                            <img
+                                                src="../images/upi.jpg"
+                                                alt="UPI"
+                                                class="upi-app-icon"
+                                            >
+
+                                            <span class="upi-app-name">
+                                                Other UPI
+                                            </span>
+
+                                        </label>
+
+                                    </div>
+
+
+
+                                    <!-- OTHER UPI ID -->
+
+                                    <div
+                                        id="other-upi-details"
+                                        class="other-upi-details"
+                                        style="display: none;"
+                                    >
+
+                                        <div class="form-group">
+
+                                            <label for="upi-id">
+                                                UPI ID
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="upi-id"
+                                                name="upiId"
+                                                placeholder="example@upi"
+                                            >
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- =================================================
+                                     CREDIT / DEBIT CARD
+                                ================================================== -->
+
+                                <label class="payment-option">
+
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="card"
+                                    >
+
+                                    <span class="payment-option-content">
+
+                                        <strong>
+                                            Credit / Debit Card
+                                        </strong>
+
+                                        <small>
+                                            Secure card payment
+                                        </small>
+
+                                    </span>
+
+                                </label>
+
+
+
+                                <!-- CARD DETAILS -->
+
+                                <div
+                                    id="card-details"
+                                    class="payment-details"
+                                    style="display: none;"
+                                >
+
+                                    <div class="form-group">
+
+                                        <label for="card-number">
+                                            Card Number
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="card-number"
+                                            name="cardNumber"
+                                            inputmode="numeric"
+                                            maxlength="16"
+                                            placeholder="Enter 16-digit card number"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="form-row">
+
+                                        <div class="form-group">
+
+                                            <label for="expiry">
+                                                Expiry Date
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="expiry"
+                                                name="expiry"
+                                                placeholder="MM/YY"
+                                                maxlength="5"
+                                            >
+
+                                        </div>
+
+
+                                        <div class="form-group">
+
+                                            <label for="cvv">
+                                                CVV
+                                            </label>
+
+                                            <input
+                                                type="password"
+                                                id="cvv"
+                                                name="cvv"
+                                                inputmode="numeric"
+                                                maxlength="3"
+                                                placeholder="CVV"
+                                            >
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- =================================================
+                                     CASH ON DELIVERY
+                                ================================================== -->
+
+                                <label class="payment-option">
+
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="cod"
+                                    >
+
+                                    <span class="payment-option-content">
+
+                                        <strong>
+                                            Cash on Delivery
+                                        </strong>
+
+                                        <small>
+                                            Pay when your order arrives
+                                        </small>
+
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </section>
+
+
+                    </form>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     PLACE ORDER
+                ================================================== -->
+
+                <section class="checkout-card checkout-place-order">
+
+                    <div class="secure-checkout">
+
+                        <span>
+                            🔒
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Secure Checkout
+                            </strong>
+
+                            <p>
+                                Your order information is protected.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        form="checkout-form"
+                        id="place-order-button"
+                        class="place-order-button"
+                    >
+                        Place Order
+                    </button>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ORDER SUMMARY
+            ================================================== -->
+
+            <aside class="checkout-summary">
+
+                <h2>
+                    Order Summary
+                </h2>
+
+
+                <div
+                    id="checkout-items"
+                    class="checkout-items"
+                >
+                </div>
+
+
+                <div class="checkout-divider">
+                </div>
+
+
+                <div class="checkout-summary-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <strong id="checkout-subtotal">
+                        ₹0
+                    </strong>
+
+                </div>
+
+
+                <div class="checkout-summary-row">
+
+                    <span>
+                        Delivery
+                    </span>
+
+                    <strong id="checkout-delivery">
+                        FREE
+                    </strong>
+
+                </div>
+
+
+                <div class="checkout-divider">
+                </div>
+
+
+                <div class="checkout-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="checkout-total">
+                        ₹0
+                    </strong>
+
+                </div>
+
+
+                <a
+                    href="cart.html"
+                    class="back-to-cart"
+                >
+                    ← Back to Cart
+                </a>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-container">
+
+
+            <div class="footer-column">
+
+                <h3>
+                    ShopSphere
+                </h3>
+
+                <p>
+                    Discover products from trusted sellers
+                    across one convenient marketplace.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Shop
+                </h3>
+
+                <a href="../index.html">
+                    Home
+                </a>
+
+                <a href="products.html">
+                    Products
+                </a>
+
+                <a href="vendors.html">
+                    Sellers
+                </a>
+
+                <a href="cart.html">
+                    Cart
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Information
+                </h3>
+
+                <a href="about.html">
+                    About Us
+                </a>
+
+                <a href="contact.html">
+                    Contact
+                </a>
+
+                <a href="#">
+                    Privacy Policy
+                </a>
+
+                <a href="#">
+                    Terms & Conditions
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Customer Support
+                </h3>
+
+                <p>
+                    support@shopsphere.com
+                </p>
+
+                <p>
+                    +91 9876543210
+                </p>
+
+                <a href="contact.html">
+                    Contact Support →
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 ShopSphere. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+
+    <script src="../js/script.js"></script>
+
+</body>
+
+</html>

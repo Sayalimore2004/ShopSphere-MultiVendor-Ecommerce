@@ -1,0 +1,346 @@
+css
+/* =========================================================
+   SHOPSPHERE
+   CUSTOMER PROFILE PAGE
+========================================================= */
+
+.profile-page {
+    min-height: 70vh;
+    background: #fafafa;
+    padding-bottom: 70px;
+}
+
+
+/* =========================================================
+   PROFILE CONTAINER
+========================================================= */
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 30px 60px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.profile-page-header {
+    margin-bottom: 30px;
+}
+
+.profile-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+    color: #777;
+}
+
+.profile-breadcrumb a {
+    color: #555;
+    text-decoration: none;
+}
+
+.profile-breadcrumb a:hover {
+    color: #111;
+}
+
+.profile-page-header h1 {
+    margin: 0 0 8px;
+
+    font-size: 38px;
+    color: #111;
+}
+
+.profile-page-header p {
+    margin: 0;
+
+    font-size: 15px;
+    color: #666;
+}
+
+
+/* =========================================================
+   PROFILE CONTENT
+========================================================= */
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+========================================================= */
+
+.profile-card {
+    display: flex;
+    align-items: center;
+
+    gap: 25px;
+
+    padding: 30px;
+
+    background: #fff;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f2f2f2;
+
+    font-size: 42px;
+}
+
+
+/* =========================================================
+   PROFILE DETAILS
+========================================================= */
+
+.profile-details h2 {
+    margin: 0 0 8px;
+
+    font-size: 25px;
+    color: #111;
+}
+
+.profile-details p {
+    margin: 5px 0;
+
+    font-size: 15px;
+    color: #666;
+}
+
+.profile-details .profile-id {
+    margin-top: 12px;
+
+    font-size: 13px;
+    color: #888;
+}
+
+
+/* =========================================================
+   ACCOUNT ACTIONS
+========================================================= */
+
+.profile-actions {
+    padding: 30px;
+
+    background: #fff;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+}
+
+.profile-actions > h2 {
+    margin: 0 0 20px;
+
+    font-size: 22px;
+    color: #111;
+}
+
+
+/* =========================================================
+   ACTION GRID
+========================================================= */
+
+.profile-action-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   ACTION CARD
+========================================================= */
+
+.profile-action-card {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    background: #fafafa;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.profile-action-card:hover {
+    transform: translateY(-3px);
+
+    border-color: #ccc;
+
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+
+/* =========================================================
+   ACTION ICON
+========================================================= */
+
+.profile-action-icon {
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   ACTION TEXT
+========================================================= */
+
+.profile-action-card h3 {
+    margin: 2px 0 7px;
+
+    font-size: 16px;
+
+    color: #222;
+}
+
+.profile-action-card p {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #777;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout-section {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.logout-button {
+    padding: 12px 25px;
+
+    border: 1px solid #111;
+    border-radius: 6px;
+
+    background: #111;
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .profile-action-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .profile-container {
+        padding: 30px 20px 50px;
+    }
+
+    .profile-page-header h1 {
+        font-size: 30px;
+    }
+
+    .profile-card {
+        flex-direction: column;
+        align-items: flex-start;
+
+        padding: 25px;
+    }
+
+    .profile-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-actions {
+        padding: 25px;
+    }
+
+    .logout-section {
+        justify-content: stretch;
+    }
+
+    .logout-button {
+        width: 100%;
+    }
+
+}
+
