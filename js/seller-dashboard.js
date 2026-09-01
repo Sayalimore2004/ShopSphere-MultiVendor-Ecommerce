@@ -1,7 +1,27 @@
 /* =========================================================
    SHOPSPHERE
    SELLER DASHBOARD JAVASCRIPT
-   STORE + PRODUCTS + STOCK + ORDERS + BEST SELLING
+
+   FEATURES:
+   - Store Information
+   - Edit Store
+   - Add Product
+   - Edit Product
+   - Delete Product
+   - Stock Management
+   - Order Management
+   - Order Status
+   - Total Products
+   - Total Orders
+   - Total Sales
+   - Platform Commission
+   - Seller Earnings
+   - Best Selling Product
+
+   STORAGE:
+   shopSphereCurrentSeller
+   shopSphereSellerProducts
+   shopSphereOrders
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -19,6 +39,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
+       COMMISSION
+    ===================================================== */
+
+    const COMMISSION_RATE = 0.10;
+
+
+    /* =====================================================
        STORAGE HELPERS
     ===================================================== */
 
@@ -26,15 +53,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
 
-            const seller = JSON.parse(
-                localStorage.getItem(SELLER_KEY)
-            );
+            const data = localStorage.getItem(SELLER_KEY);
 
-            return seller || null;
+            if (!data) {
+                return null;
+            }
+
+            return JSON.parse(data);
 
         } catch (error) {
 
-            console.error("Could not read seller information:", error);
+            console.error("Error reading seller:", error);
 
             return null;
         }
@@ -43,11 +72,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function saveCurrentSeller(seller) {
 
-        localStorage.setItem(
-            SELLER_KEY,
-            JSON.stringify(seller)
-        );
+        try {
 
+            localStorage.setItem(
+                SELLER_KEY,
+                JSON.stringify(seller)
+            );
+
+        } catch (error) {
+
+            console.error("Error saving seller:", error);
+        }
     }
 
 
@@ -55,9 +90,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
 
-            const products = JSON.parse(
-                localStorage.getItem(PRODUCTS_KEY)
-            );
+            const data =
+                localStorage.getItem(PRODUCTS_KEY);
+
+            if (!data) {
+                return [];
+            }
+
+            const products = JSON.parse(data);
 
             return Array.isArray(products)
                 ? products
@@ -65,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (error) {
 
-            console.error("Could not read products:", error);
+            console.error("Error reading products:", error);
 
             return [];
         }
@@ -74,11 +114,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function saveProducts(products) {
 
-        localStorage.setItem(
-            PRODUCTS_KEY,
-            JSON.stringify(products)
-        );
+        try {
 
+            localStorage.setItem(
+                PRODUCTS_KEY,
+                JSON.stringify(products)
+            );
+
+        } catch (error) {
+
+            console.error("Error saving products:", error);
+        }
     }
 
 
@@ -86,9 +132,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
 
-            const orders = JSON.parse(
-                localStorage.getItem(ORDERS_KEY)
-            );
+            const data =
+                localStorage.getItem(ORDERS_KEY);
+
+            if (!data) {
+                return [];
+            }
+
+            const orders = JSON.parse(data);
 
             return Array.isArray(orders)
                 ? orders
@@ -96,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (error) {
 
-            console.error("Could not read orders:", error);
+            console.error("Error reading orders:", error);
 
             return [];
         }
@@ -105,11 +156,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function saveOrders(orders) {
 
-        localStorage.setItem(
-            ORDERS_KEY,
-            JSON.stringify(orders)
-        );
+        try {
 
+            localStorage.setItem(
+                ORDERS_KEY,
+                JSON.stringify(orders)
+            );
+
+        } catch (error) {
+
+            console.error("Error saving orders:", error);
+        }
     }
 
 
@@ -125,7 +182,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
-
     }
 
 
@@ -133,10 +189,38 @@ document.addEventListener("DOMContentLoaded", function () {
        PRICE FORMAT
     ===================================================== */
 
-    function formatPrice(price) {
+    function formatPrice(value) {
 
-        return Number(price || 0).toLocaleString("en-IN");
+        const number = Number(value);
 
+        if (!Number.isFinite(number)) {
+            return "0";
+        }
+
+        return number.toLocaleString("en-IN", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        });
+    }
+
+
+    /* =====================================================
+       COMMISSION
+    ===================================================== */
+
+    function calculateCommission(amount) {
+
+        const value = Number(amount) || 0;
+
+        return value * COMMISSION_RATE;
+    }
+
+
+    function calculateSellerEarnings(amount) {
+
+        const value = Number(amount) || 0;
+
+        return value - calculateCommission(value);
     }
 
 
@@ -148,20 +232,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const seller = getCurrentSeller();
 
+
         const storeNameElement =
             document.getElementById("seller-store-name");
+
 
         const sellerDetailsElement =
             document.getElementById("seller-details");
 
+
         const storeInfoName =
             document.getElementById("store-info-name");
+
 
         const storeInfoOwner =
             document.getElementById("store-info-owner");
 
+
         const storeInfoEmail =
             document.getElementById("store-info-email");
+
 
         const storeInfoCategory =
             document.getElementById("store-info-category");
@@ -202,8 +292,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (storeNameElement) {
 
             storeNameElement.textContent =
-                "Welcome, " + (seller.storeName || "Seller");
-
+                "Welcome, " +
+                (seller.storeName || "Seller");
         }
 
 
@@ -213,7 +303,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 (seller.category || "Store") +
                 " store • Owner: " +
                 (seller.name || "Seller");
-
         }
 
 
@@ -221,7 +310,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             storeInfoName.textContent =
                 seller.storeName || "—";
-
         }
 
 
@@ -229,7 +317,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             storeInfoOwner.textContent =
                 seller.name || "—";
-
         }
 
 
@@ -237,7 +324,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             storeInfoEmail.textContent =
                 seller.email || "—";
-
         }
 
 
@@ -245,9 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             storeInfoCategory.textContent =
                 seller.category || "—";
-
         }
-
     }
 
 
@@ -269,44 +353,60 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        const formContainer =
+        const container =
             document.getElementById(
                 "edit-store-form-container"
             );
 
 
-        if (!formContainer) {
+        if (!container) {
             return;
         }
 
 
         const nameInput =
-            document.getElementById("edit-seller-name");
+            document.getElementById(
+                "edit-seller-name"
+            );
+
 
         const emailInput =
-            document.getElementById("edit-seller-email");
+            document.getElementById(
+                "edit-seller-email"
+            );
+
 
         const storeInput =
-            document.getElementById("edit-store-name");
+            document.getElementById(
+                "edit-store-name"
+            );
+
 
         const categoryInput =
-            document.getElementById("edit-seller-category");
+            document.getElementById(
+                "edit-seller-category"
+            );
 
 
         if (nameInput) {
             nameInput.value = seller.name || "";
         }
 
+
         if (emailInput) {
             emailInput.value = seller.email || "";
         }
 
+
         if (storeInput) {
-            storeInput.value = seller.storeName || "";
+            storeInput.value =
+                seller.storeName || "";
         }
 
+
         if (categoryInput) {
-            categoryInput.value = seller.category || "";
+            categoryInput.value =
+                seller.category || "";
         }
 
 
@@ -319,27 +419,29 @@ document.addEventListener("DOMContentLoaded", function () {
         if (message) {
 
             message.textContent = "";
-            message.className = "edit-store-message";
 
+            message.className =
+                "edit-store-message";
         }
 
 
-        formContainer.hidden = false;
+        container.hidden = false;
 
-        formContainer.scrollIntoView({
+
+        container.scrollIntoView({
             behavior: "smooth",
             block: "center"
         });
-
     }
 
 
     function closeEditStoreForm() {
 
-        const formContainer =
+        const container =
             document.getElementById(
                 "edit-store-form-container"
             );
+
 
         const form =
             document.getElementById(
@@ -347,25 +449,21 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        if (formContainer) {
-
-            formContainer.hidden = true;
-
+        if (container) {
+            container.hidden = true;
         }
 
 
         if (form) {
-
             form.reset();
-
         }
-
     }
 
 
     function updateStoreInformation(event) {
 
         event.preventDefault();
+
 
         const seller = getCurrentSeller();
 
@@ -410,7 +508,12 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        if (!name || !email || !storeName || !category) {
+        if (
+            !name ||
+            !email ||
+            !storeName ||
+            !category
+        ) {
 
             if (message) {
 
@@ -419,7 +522,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 message.className =
                     "edit-store-message error";
-
             }
 
             return;
@@ -430,15 +532,19 @@ document.addEventListener("DOMContentLoaded", function () {
         seller.email = email;
         seller.storeName = storeName;
         seller.category = category;
-        seller.updatedAt = new Date().toLocaleString("en-IN");
+
+
+        seller.updatedAt =
+            new Date().toLocaleString("en-IN");
 
 
         saveCurrentSeller(seller);
 
 
-        /* Update seller name inside products */
+        /* Update seller name in existing products */
 
         const products = getProducts();
+
 
         products.forEach(function (product) {
 
@@ -449,9 +555,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 product.sellerName =
                     seller.storeName;
-
             }
-
         });
 
 
@@ -470,7 +574,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             message.className =
                 "edit-store-message success";
-
         }
 
 
@@ -479,7 +582,6 @@ document.addEventListener("DOMContentLoaded", function () {
             closeEditStoreForm();
 
         }, 1000);
-
     }
 
 
@@ -490,22 +592,28 @@ document.addEventListener("DOMContentLoaded", function () {
     function resetProductForm() {
 
         const form =
-            document.getElementById("product-form");
+            document.getElementById(
+                "product-form"
+            );
+
 
         const submitButton =
             document.getElementById(
                 "product-submit-button"
             );
 
+
         const cancelButton =
             document.getElementById(
                 "cancel-product-edit"
             );
 
+
         const title =
             document.getElementById(
                 "product-form-title"
             );
+
 
         const description =
             document.getElementById(
@@ -518,7 +626,6 @@ document.addEventListener("DOMContentLoaded", function () {
             form.reset();
 
             delete form.dataset.editingId;
-
         }
 
 
@@ -526,14 +633,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             submitButton.textContent =
                 "Add Product";
-
         }
 
 
         if (cancelButton) {
 
             cancelButton.hidden = true;
-
         }
 
 
@@ -541,7 +646,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             title.textContent =
                 "Add New Product";
-
         }
 
 
@@ -549,61 +653,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
             description.textContent =
                 "Add a product to your ShopSphere store.";
-
         }
-
     }
 
 
     /* =====================================================
-       STOCK STATUS
+       STOCK
     ===================================================== */
 
     function getStockStatus(stock) {
 
-        const quantity = Number(stock) || 0;
+        const quantity =
+            Number(stock) || 0;
 
 
         if (quantity <= 0) {
-
             return "Out of Stock";
-
         }
 
 
         if (quantity <= 5) {
-
             return "Low Stock";
-
         }
 
 
         return "In Stock";
-
     }
 
 
     function getStockClass(stock) {
 
-        const quantity = Number(stock) || 0;
+        const quantity =
+            Number(stock) || 0;
 
 
         if (quantity <= 0) {
-
             return "stock-out";
-
         }
 
 
         if (quantity <= 5) {
-
             return "stock-low";
-
         }
 
 
         return "stock-in";
-
     }
 
 
@@ -618,6 +712,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "product-list"
             );
 
+
         const totalProducts =
             document.getElementById(
                 "total-products"
@@ -629,9 +724,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        const seller = getCurrentSeller();
+        const seller =
+            getCurrentSeller();
 
-        const allProducts = getProducts();
+
+        const allProducts =
+            getProducts();
 
 
         if (!seller) {
@@ -650,6 +748,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             `;
 
+
             if (totalProducts) {
                 totalProducts.textContent = "0";
             }
@@ -665,7 +764,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     String(product.sellerId) ===
                     String(seller.id)
                 );
-
             });
 
 
@@ -673,7 +771,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             totalProducts.textContent =
                 sellerProducts.length;
-
         }
 
 
@@ -683,7 +780,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 <div class="no-products">
 
-                    <h3>No products yet</h3>
+                    <h3>
+                        No products yet
+                    </h3>
 
                     <p>
                         Add your first product
@@ -703,11 +802,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sellerProducts.forEach(function (product) {
 
-            const productCard =
+            const card =
                 document.createElement("article");
 
 
-            productCard.className =
+            card.className =
                 "vendor-product-card";
 
 
@@ -719,18 +818,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 product.status || "pending";
 
 
-            productCard.innerHTML = `
+            card.innerHTML = `
 
                 <img
                     class="vendor-product-image"
                     src="${escapeHtml(product.image)}"
                     alt="${escapeHtml(product.name)}"
-                    onerror="this.src='../images/placeholder.jpg';"
+                    onerror="this.style.display='none';"
                 >
 
 
                 <div class="vendor-product-content">
-
 
                     <h3>
                         ${escapeHtml(product.name)}
@@ -762,9 +860,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             <button
                                 type="button"
                                 class="stock-button"
-                                data-id="${product.id}"
+                                data-id="${escapeHtml(product.id)}"
                                 data-action="decrease"
-                                aria-label="Decrease stock"
                             >
                                 −
                             </button>
@@ -778,9 +875,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             <button
                                 type="button"
                                 class="stock-button"
-                                data-id="${product.id}"
+                                data-id="${escapeHtml(product.id)}"
                                 data-action="increase"
-                                aria-label="Increase stock"
                             >
                                 +
                             </button>
@@ -811,7 +907,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button
                             type="button"
                             class="edit-product"
-                            data-id="${product.id}"
+                            data-id="${escapeHtml(product.id)}"
                         >
                             Edit
                         </button>
@@ -820,33 +916,29 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button
                             type="button"
                             class="delete-product"
-                            data-id="${product.id}"
+                            data-id="${escapeHtml(product.id)}"
                         >
                             Delete
                         </button>
 
                     </div>
 
-
                 </div>
-
             `;
 
 
-            productList.appendChild(productCard);
-
+            productList.appendChild(card);
         });
 
 
         addEditEvents();
         addDeleteEvents();
         addStockEvents();
-
     }
 
 
     /* =====================================================
-       EDIT PRODUCT
+       EDIT PRODUCT EVENTS
     ===================================================== */
 
     function addEditEvents() {
@@ -860,7 +952,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     function () {
 
                         const productId =
-                            Number(button.dataset.id);
+                            String(button.dataset.id);
 
 
                         const seller =
@@ -882,22 +974,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                         const product =
-                            products.find(function (item) {
+                            products.find(
+                                function (item) {
 
-                                return (
-                                    Number(item.id) ===
-                                    productId &&
+                                    return (
+                                        String(item.id) ===
+                                        productId &&
 
-                                    String(item.sellerId) ===
-                                    String(seller.id)
-                                );
-
-                            });
+                                        String(item.sellerId) ===
+                                        String(seller.id)
+                                    );
+                                }
+                            );
 
 
                         if (!product) {
 
-                            alert("Product not found.");
+                            alert(
+                                "Product not found."
+                            );
 
                             return;
                         }
@@ -914,44 +1009,80 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
 
 
-                        document.getElementById(
-                            "product-name"
-                        ).value =
-                            product.name || "";
+                        const nameInput =
+                            document.getElementById(
+                                "product-name"
+                            );
 
 
-                        document.getElementById(
-                            "product-price"
-                        ).value =
-                            product.price || "";
+                        const priceInput =
+                            document.getElementById(
+                                "product-price"
+                            );
 
 
-                        document.getElementById(
-                            "product-category"
-                        ).value =
-                            product.category || "";
+                        const categoryInput =
+                            document.getElementById(
+                                "product-category"
+                            );
 
 
-                        document.getElementById(
-                            "product-stock"
-                        ).value =
-                            product.stock ?? 0;
+                        const stockInput =
+                            document.getElementById(
+                                "product-stock"
+                            );
 
 
-                        document.getElementById(
-                            "product-image"
-                        ).value =
-                            product.image || "";
+                        const imageInput =
+                            document.getElementById(
+                                "product-image"
+                            );
 
 
-                        document.getElementById(
-                            "product-description"
-                        ).value =
-                            product.description || "";
+                        const descriptionInput =
+                            document.getElementById(
+                                "product-description"
+                            );
+
+
+                        if (nameInput) {
+                            nameInput.value =
+                                product.name || "";
+                        }
+
+
+                        if (priceInput) {
+                            priceInput.value =
+                                product.price ?? "";
+                        }
+
+
+                        if (categoryInput) {
+                            categoryInput.value =
+                                product.category || "";
+                        }
+
+
+                        if (stockInput) {
+                            stockInput.value =
+                                product.stock ?? 0;
+                        }
+
+
+                        if (imageInput) {
+                            imageInput.value =
+                                product.image || "";
+                        }
+
+
+                        if (descriptionInput) {
+                            descriptionInput.value =
+                                product.description || "";
+                        }
 
 
                         form.dataset.editingId =
-                            productId;
+                            product.id;
 
 
                         const submitButton =
@@ -979,34 +1110,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                         if (submitButton) {
-
                             submitButton.textContent =
                                 "Update Product";
-
                         }
 
 
                         if (cancelButton) {
-
-                            cancelButton.hidden =
-                                false;
-
+                            cancelButton.hidden = false;
                         }
 
 
                         if (title) {
-
                             title.textContent =
                                 "Edit Product";
-
                         }
 
 
                         if (description) {
-
                             description.textContent =
                                 "Update the details of your product.";
-
                         }
 
 
@@ -1019,7 +1141,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
 
             });
-
     }
 
 
@@ -1038,16 +1159,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     function () {
 
                         const productId =
-                            Number(button.dataset.id);
+                            String(button.dataset.id);
 
 
-                        const confirmed =
-                            confirm(
+                        if (
+                            !confirm(
                                 "Are you sure you want to delete this product?"
-                            );
-
-
-                        if (!confirmed) {
+                            )
+                        ) {
                             return;
                         }
 
@@ -1071,17 +1190,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                         products =
-                            products.filter(function (product) {
+                            products.filter(
+                                function (product) {
 
-                                return !(
-                                    Number(product.id) ===
-                                    productId &&
+                                    return !(
+                                        String(product.id) ===
+                                        productId &&
 
-                                    String(product.sellerId) ===
-                                    String(seller.id)
-                                );
-
-                            });
+                                        String(product.sellerId) ===
+                                        String(seller.id)
+                                    );
+                                }
+                            );
 
 
                         saveProducts(products);
@@ -1095,12 +1215,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         alert(
                             "Product deleted successfully!"
                         );
-
                     }
                 );
 
             });
-
     }
 
 
@@ -1118,23 +1236,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     "click",
                     function () {
 
-                        const productId =
-                            Number(button.dataset.id);
-
-                        const action =
-                            button.dataset.action;
-
-
                         updateProductStock(
-                            productId,
-                            action
+                            String(button.dataset.id),
+                            button.dataset.action
                         );
 
                     }
                 );
 
             });
-
     }
 
 
@@ -1166,51 +1276,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         const index =
-            products.findIndex(function (product) {
+            products.findIndex(
+                function (product) {
 
-                return (
-                    Number(product.id) ===
-                    productId &&
+                    return (
+                        String(product.id) ===
+                        String(productId) &&
 
-                    String(product.sellerId) ===
-                    String(seller.id)
-                );
-
-            });
+                        String(product.sellerId) ===
+                        String(seller.id)
+                    );
+                }
+            );
 
 
         if (index === -1) {
 
-            alert("Product not found.");
+            alert(
+                "Product not found."
+            );
 
             return;
         }
 
 
-        let currentStock =
+        let stock =
             Number(products[index].stock) || 0;
 
 
         if (action === "increase") {
-
-            currentStock++;
-
+            stock++;
         }
 
 
-        if (action === "decrease") {
-
-            if (currentStock <= 0) {
-                return;
-            }
-
-            currentStock--;
-
+        if (
+            action === "decrease" &&
+            stock > 0
+        ) {
+            stock--;
         }
 
 
         products[index].stock =
-            currentStock;
+            stock;
 
 
         products[index].updatedAt =
@@ -1221,12 +1329,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         displayProducts();
-
     }
 
 
     /* =====================================================
-       PRODUCT FORM SUBMIT
+       PRODUCT FORM
     ===================================================== */
 
     const productForm =
@@ -1322,14 +1429,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 const editingId =
-                    Number(
-                        productForm.dataset.editingId
-                    ) || null;
+                    productForm.dataset.editingId;
 
 
-                /* =============================================
-                   UPDATE PRODUCT
-                ============================================= */
+                /* =================================================
+                   UPDATE EXISTING PRODUCT
+                ================================================= */
 
                 if (editingId) {
 
@@ -1338,13 +1443,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             function (product) {
 
                                 return (
-                                    Number(product.id) ===
-                                    editingId &&
+                                    String(product.id) ===
+                                    String(editingId) &&
 
                                     String(product.sellerId) ===
                                     String(seller.id)
                                 );
-
                             }
                         );
 
@@ -1380,9 +1484,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         description;
 
                     products[index].updatedAt =
-                        new Date().toLocaleString(
-                            "en-IN"
-                        );
+                        new Date().toLocaleString("en-IN");
 
 
                     saveProducts(products);
@@ -1402,42 +1504,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
-                /* =============================================
+                /* =================================================
                    CREATE NEW PRODUCT
-                ============================================= */
+                ================================================= */
 
                 const product = {
 
                     id: Date.now(),
 
-                    sellerId: seller.id,
+                    sellerId:
+                        seller.id,
 
                     sellerName:
                         seller.storeName,
 
-                    name: name,
+                    name:
+                        name,
 
-                    price: price,
+                    price:
+                        price,
 
-                    category: category,
+                    category:
+                        category,
 
-                    stock: stock,
+                    stock:
+                        stock,
 
-                    image: image,
+                    image:
+                        image,
 
-                    description: description,
+                    description:
+                        description,
 
-                    status: "pending",
+                    status:
+                        "pending",
 
                     createdAt:
-                        new Date().toLocaleString(
-                            "en-IN"
-                        )
-
+                        new Date().toLocaleString("en-IN")
                 };
 
 
                 products.push(product);
+
 
                 saveProducts(products);
 
@@ -1450,10 +1558,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert(
                     "Product added successfully!"
                 );
-
             }
         );
-
     }
 
 
@@ -1477,15 +1583,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             }
         );
-
     }
 
 
     /* =====================================================
        NORMALIZE ORDER ITEMS
-       Supports both:
-       1. Old single-product orders
-       2. New cart/multiple-product orders
     ===================================================== */
 
     function getOrderItems(order) {
@@ -1495,59 +1597,99 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Multiple products */
-
         if (Array.isArray(order.items)) {
 
-            return order.items.map(function (item) {
+            return order.items.map(
+                function (item) {
 
-                return {
-
-                    productId:
-                        item.productId ??
-                        item.id ??
-                        null,
-
-                    productName:
-                        item.productName ??
-                        item.name ??
-                        "Product",
-
-                    sellerId:
-                        item.sellerId ??
-                        order.sellerId ??
-                        null,
-
-                    quantity:
+                    const quantity =
                         Number(
                             item.quantity ??
                             item.qty ??
                             1
-                        ),
+                        ) || 1;
 
-                    price:
-                        Number(
-                            item.price ??
-                            0
-                        ),
 
-                    totalAmount:
+                    const price =
                         Number(
-                            item.totalAmount ??
-                            (
-                                Number(item.price || 0) *
-                                Number(item.quantity || 1)
-                            )
+                            item.price ?? 0
+                        ) || 0;
+
+
+                    let totalAmount =
+                        Number(
+                            item.totalAmount
+                        );
+
+
+                    if (
+                        !Number.isFinite(
+                            totalAmount
                         )
+                    ) {
 
-                };
+                        totalAmount =
+                            price * quantity;
+                    }
 
-            });
 
+                    return {
+
+                        productId:
+                            item.productId ??
+                            item.id ??
+                            null,
+
+                        productName:
+                            item.productName ??
+                            item.name ??
+                            "Product",
+
+                        sellerId:
+                            item.sellerId ??
+                            order.sellerId ??
+                            null,
+
+                        quantity:
+                            quantity,
+
+                        price:
+                            price,
+
+                        totalAmount:
+                            totalAmount
+                    };
+                }
+            );
         }
 
 
         /* Single-product order */
+
+        const quantity =
+            Number(
+                order.quantity || 1
+            ) || 1;
+
+
+        const price =
+            Number(
+                order.price || 0
+            ) || 0;
+
+
+        let totalAmount =
+            Number(
+                order.totalAmount
+            );
+
+
+        if (!Number.isFinite(totalAmount)) {
+
+            totalAmount =
+                price * quantity;
+        }
+
 
         return [{
 
@@ -1565,22 +1707,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 null,
 
             quantity:
-                Number(order.quantity || 1),
+                quantity,
 
             price:
-                Number(order.price || 0),
+                price,
 
             totalAmount:
-                Number(
-                    order.totalAmount ||
-                    (
-                        Number(order.price || 0) *
-                        Number(order.quantity || 1)
-                    )
-                )
-
+                totalAmount
         }];
-
     }
 
 
@@ -1588,21 +1722,43 @@ document.addEventListener("DOMContentLoaded", function () {
        GET SELLER ORDER ITEMS
     ===================================================== */
 
-    function getSellerOrderItems(order, sellerId) {
+    function getSellerOrderItems(
+        order,
+        sellerId
+    ) {
 
         const items =
             getOrderItems(order);
 
 
-        return items.filter(function (item) {
+        return items.filter(
+            function (item) {
 
-            return (
-                String(item.sellerId) ===
-                String(sellerId)
-            );
+                return (
+                    String(item.sellerId) ===
+                    String(sellerId)
+                );
+            }
+        );
+    }
 
-        });
 
+    /* =====================================================
+       GET ORDER STATUS
+    ===================================================== */
+
+    function getOrderStatus(order) {
+
+        if (!order || !order.status) {
+            return "Pending";
+        }
+
+
+        return String(order.status)
+            .toLowerCase()
+            .replace(/^\w/, function (letter) {
+                return letter.toUpperCase();
+            });
     }
 
 
@@ -1618,6 +1774,11 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
+        if (!ordersList) {
+            return;
+        }
+
+
         const totalOrders =
             document.getElementById(
                 "total-orders"
@@ -1630,14 +1791,53 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        if (!ordersList) {
-            return;
-        }
+        const totalCommission =
+            document.getElementById(
+                "total-commission"
+            );
+
+
+        const sellerEarnings =
+            document.getElementById(
+                "seller-earnings"
+            );
 
 
         const seller =
             getCurrentSeller();
 
+
+        /* =================================================
+           ALWAYS RESET FINANCIAL VALUES FIRST
+           This guarantees ₹0 when there are no orders.
+        ================================================= */
+
+        if (totalOrders) {
+            totalOrders.textContent = "0";
+        }
+
+
+        if (totalSales) {
+            totalSales.textContent = "₹0";
+        }
+
+
+        if (totalCommission) {
+            totalCommission.textContent = "₹0";
+        }
+
+
+        if (sellerEarnings) {
+            sellerEarnings.textContent = "₹0";
+        }
+
+
+        displayBestSellingProduct([]);
+
+
+        /* =================================================
+           NO SELLER
+        ================================================= */
 
         if (!seller) {
 
@@ -1654,9 +1854,47 @@ document.addEventListener("DOMContentLoaded", function () {
                     </p>
 
                 </div>
-
             `;
 
+            return;
+        }
+
+
+        const allOrders =
+            getOrders();
+
+
+        const sellerOrders = [];
+
+
+        allOrders.forEach(
+            function (order) {
+
+                const sellerItems =
+                    getSellerOrderItems(
+                        order,
+                        seller.id
+                    );
+
+
+                if (sellerItems.length > 0) {
+
+                    sellerOrders.push({
+
+                        order: order,
+
+                        items: sellerItems
+                    });
+                }
+            }
+        );
+
+
+        /* =================================================
+           NO SELLER ORDERS
+        ================================================= */
+
+        if (sellerOrders.length === 0) {
 
             if (totalOrders) {
                 totalOrders.textContent = "0";
@@ -1668,110 +1906,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
+            if (totalCommission) {
+                totalCommission.textContent = "₹0";
+            }
+
+
+            if (sellerEarnings) {
+                sellerEarnings.textContent = "₹0";
+            }
+
+
             displayBestSellingProduct([]);
 
-            return;
-        }
-
-
-        const allOrders =
-            getOrders();
-
-
-        /*
-         * Keep only orders that contain at least
-         * one product belonging to this seller.
-         */
-
-        const sellerOrders = [];
-
-
-        allOrders.forEach(function (order) {
-
-            const sellerItems =
-                getSellerOrderItems(
-                    order,
-                    seller.id
-                );
-
-
-            if (sellerItems.length > 0) {
-
-                sellerOrders.push({
-
-                    order: order,
-
-                    items: sellerItems
-
-                });
-
-            }
-
-        });
-
-
-        /* =================================================
-           TOTAL ORDERS
-        ================================================== */
-
-        if (totalOrders) {
-
-            totalOrders.textContent =
-                sellerOrders.length;
-
-        }
-
-
-        /* =================================================
-           TOTAL SALES
-        ================================================== */
-
-        let totalSalesAmount = 0;
-
-
-        sellerOrders.forEach(function (sellerOrder) {
-
-            if (
-                sellerOrder.order.status ===
-                "Cancelled"
-            ) {
-                return;
-            }
-
-
-            sellerOrder.items.forEach(function (item) {
-
-                totalSalesAmount +=
-                    Number(item.totalAmount || 0);
-
-            });
-
-        });
-
-
-        if (totalSales) {
-
-            totalSales.textContent =
-                "₹" +
-                formatPrice(totalSalesAmount);
-
-        }
-
-
-        /* =================================================
-           BEST SELLING PRODUCT
-        ================================================== */
-
-        displayBestSellingProduct(
-            sellerOrders
-        );
-
-
-        /* =================================================
-           NO ORDERS
-        ================================================== */
-
-        if (sellerOrders.length === 0) {
 
             ordersList.innerHTML = `
 
@@ -1787,215 +1933,394 @@ document.addEventListener("DOMContentLoaded", function () {
                     </p>
 
                 </div>
-
             `;
 
             return;
         }
 
 
-        ordersList.innerHTML = "";
+        /* =================================================
+           TOTAL ORDER COUNT
+        ================================================= */
+
+        if (totalOrders) {
+
+            totalOrders.textContent =
+                sellerOrders.length;
+        }
 
 
         /* =================================================
-           DISPLAY SELLER ORDERS
-        ================================================== */
+           TOTAL SALES
+        ================================================= */
 
-        sellerOrders.forEach(function (sellerOrder) {
-
-            const order =
-                sellerOrder.order;
+        let totalSalesAmount = 0;
 
 
-            const orderCard =
-                document.createElement(
-                    "article"
-                );
+        sellerOrders.forEach(
+            function (sellerOrder) {
+
+                const status =
+                    getOrderStatus(
+                        sellerOrder.order
+                    );
 
 
-            orderCard.className =
-                "seller-order-card";
+                if (status === "Cancelled") {
+                    return;
+                }
 
 
-            const productHtml =
-                sellerOrder.items.map(
+                sellerOrder.items.forEach(
                     function (item) {
 
-                        return `
-
-                            <div class="seller-order-product">
-
-                                <strong>
-                                    ${escapeHtml(item.productName)}
-                                </strong>
-
-                                <span>
-                                    Qty: ${item.quantity}
-                                </span>
-
-                                <span>
-                                    ₹${formatPrice(item.totalAmount)}
-                                </span>
-
-                            </div>
-
-                        `;
-
-                    }
-                ).join("");
-
-
-            const sellerOrderTotal =
-                sellerOrder.items.reduce(
-                    function (total, item) {
-
-                        return (
-                            total +
+                        totalSalesAmount +=
                             Number(
-                                item.totalAmount || 0
-                            )
-                        );
-
-                    },
-                    0
+                                item.totalAmount
+                            ) || 0;
+                    }
                 );
+            }
+        );
 
 
-            orderCard.innerHTML = `
+        /* =================================================
+           COMMISSION
+        ================================================= */
 
-                <div class="seller-order-header">
-
-                    <div>
-
-                        <h3 class="seller-order-id">
-                            Order #${escapeHtml(order.id)}
-                        </h3>
-
-                        <p class="seller-order-date">
-                            ${escapeHtml(
-                                order.createdAt || "—"
-                            )}
-                        </p>
-
-                    </div>
-
-                </div>
+        const commissionAmount =
+            calculateCommission(
+                totalSalesAmount
+            );
 
 
-                <div class="seller-order-details">
+        /* =================================================
+           SELLER EARNINGS
+        ================================================= */
+
+        const earningsAmount =
+            calculateSellerEarnings(
+                totalSalesAmount
+            );
 
 
-                    <div class="seller-order-detail">
+        if (totalSales) {
 
-                        <span>
-                            Customer
-                        </span>
-
-                        <strong>
-                            ${escapeHtml(
-                                order.customerName ||
-                                order.customer?.name ||
-                                "Customer"
-                            )}
-                        </strong>
-
-                    </div>
+            totalSales.textContent =
+                "₹" +
+                formatPrice(
+                    totalSalesAmount
+                );
+        }
 
 
-                    <div class="seller-order-detail">
+        if (totalCommission) {
 
-                        <span>
-                            Products
-                        </span>
+            totalCommission.textContent =
+                "₹" +
+                formatPrice(
+                    commissionAmount
+                );
+        }
+
+
+        if (sellerEarnings) {
+
+            sellerEarnings.textContent =
+                "₹" +
+                formatPrice(
+                    earningsAmount
+                );
+        }
+
+
+        /* =================================================
+           BEST SELLING PRODUCT
+        ================================================= */
+
+        displayBestSellingProduct(
+            sellerOrders
+        );
+
+
+        /* =================================================
+           DISPLAY ORDERS
+        ================================================= */
+
+        ordersList.innerHTML = "";
+
+
+        sellerOrders.forEach(
+            function (sellerOrder) {
+
+                const order =
+                    sellerOrder.order;
+
+
+                const orderCard =
+                    document.createElement(
+                        "article"
+                    );
+
+
+                orderCard.className =
+                    "seller-order-card";
+
+
+                const productHtml =
+                    sellerOrder.items
+                        .map(
+                            function (item) {
+
+                                return `
+
+                                    <div class="seller-order-product">
+
+                                        <strong>
+                                            ${escapeHtml(
+                                                item.productName
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            Qty:
+                                            ${item.quantity}
+                                        </span>
+
+                                        <span>
+                                            ₹${formatPrice(
+                                                item.totalAmount
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                `;
+                            }
+                        )
+                        .join("");
+
+
+                const sellerOrderTotal =
+                    sellerOrder.items.reduce(
+                        function (
+                            total,
+                            item
+                        ) {
+
+                            return (
+                                total +
+                                (
+                                    Number(
+                                        item.totalAmount
+                                    ) || 0
+                                )
+                            );
+
+                        },
+                        0
+                    );
+
+
+                const orderCommission =
+                    calculateCommission(
+                        sellerOrderTotal
+                    );
+
+
+                const orderSellerEarnings =
+                    calculateSellerEarnings(
+                        sellerOrderTotal
+                    );
+
+
+                const status =
+                    getOrderStatus(order);
+
+
+                orderCard.innerHTML = `
+
+                    <div class="seller-order-header">
 
                         <div>
-                            ${productHtml}
+
+                            <h3 class="seller-order-id">
+
+                                Order #
+                                ${escapeHtml(order.id)}
+
+                            </h3>
+
+
+                            <p class="seller-order-date">
+
+                                ${escapeHtml(
+                                    order.createdAt || "—"
+                                )}
+
+                            </p>
+
                         </div>
 
                     </div>
 
 
-                    <div class="seller-order-detail">
+                    <div class="seller-order-details">
 
-                        <span>
-                            Total Amount
-                        </span>
 
-                        <strong>
-                            ₹${formatPrice(sellerOrderTotal)}
-                        </strong>
+                        <div class="seller-order-detail">
+
+                            <span>
+                                Customer
+                            </span>
+
+                            <strong>
+
+                                ${escapeHtml(
+                                    order.customerName ||
+                                    order.customer?.name ||
+                                    "Customer"
+                                )}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="seller-order-detail">
+
+                            <span>
+                                Products
+                            </span>
+
+                            <div>
+                                ${productHtml}
+                            </div>
+
+                        </div>
+
+
+                        <div class="seller-order-detail">
+
+                            <span>
+                                Gross Sales
+                            </span>
+
+                            <strong>
+
+                                ₹${formatPrice(
+                                    sellerOrderTotal
+                                )}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="seller-order-detail">
+
+                            <span>
+                                ShopSphere Commission
+                            </span>
+
+                            <strong>
+
+                                ₹${formatPrice(
+                                    orderCommission
+                                )}
+
+                                <small>
+                                    (10%)
+                                </small>
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="seller-order-detail">
+
+                            <span>
+                                Seller Earnings
+                            </span>
+
+                            <strong>
+
+                                ₹${formatPrice(
+                                    orderSellerEarnings
+                                )}
+
+                            </strong>
+
+                        </div>
+
 
                     </div>
 
 
-                </div>
+                    <div class="seller-order-status">
+
+                        <span class="order-status-label">
+                            Order Status
+                        </span>
 
 
-                <div class="seller-order-status">
-
-                    <span class="order-status-label">
-                        Order Status
-                    </span>
-
-
-                    <select
-                        class="order-status-select"
-                        data-order-id="${escapeHtml(order.id)}"
-                    >
-
-                        <option
-                            value="Pending"
-                            ${order.status === "Pending" ? "selected" : ""}
+                        <select
+                            class="order-status-select"
+                            data-order-id="${escapeHtml(order.id)}"
                         >
-                            Pending
-                        </option>
+
+                            <option
+                                value="Pending"
+                                ${status === "Pending" ? "selected" : ""}
+                            >
+                                Pending
+                            </option>
 
 
-                        <option
-                            value="Confirmed"
-                            ${order.status === "Confirmed" ? "selected" : ""}
-                        >
-                            Confirmed
-                        </option>
+                            <option
+                                value="Confirmed"
+                                ${status === "Confirmed" ? "selected" : ""}
+                            >
+                                Confirmed
+                            </option>
 
 
-                        <option
-                            value="Shipped"
-                            ${order.status === "Shipped" ? "selected" : ""}
-                        >
-                            Shipped
-                        </option>
+                            <option
+                                value="Shipped"
+                                ${status === "Shipped" ? "selected" : ""}
+                            >
+                                Shipped
+                            </option>
 
 
-                        <option
-                            value="Delivered"
-                            ${order.status === "Delivered" ? "selected" : ""}
-                        >
-                            Delivered
-                        </option>
+                            <option
+                                value="Delivered"
+                                ${status === "Delivered" ? "selected" : ""}
+                            >
+                                Delivered
+                            </option>
 
 
-                        <option
-                            value="Cancelled"
-                            ${order.status === "Cancelled" ? "selected" : ""}
-                        >
-                            Cancelled
-                        </option>
+                            <option
+                                value="Cancelled"
+                                ${status === "Cancelled" ? "selected" : ""}
+                            >
+                                Cancelled
+                            </option>
 
-                    </select>
+                        </select>
 
-                </div>
+                    </div>
+                `;
 
-            `;
 
-
-            ordersList.appendChild(orderCard);
-
-        });
+                ordersList.appendChild(orderCard);
+            }
+        );
 
 
         addOrderStatusEvents();
-
     }
 
 
@@ -2003,7 +2328,9 @@ document.addEventListener("DOMContentLoaded", function () {
        BEST SELLING PRODUCT
     ===================================================== */
 
-    function displayBestSellingProduct(sellerOrders) {
+    function displayBestSellingProduct(
+        sellerOrders
+    ) {
 
         let bestSellingElement =
             document.getElementById(
@@ -2011,10 +2338,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        /*
-         * Create the card if HTML does not already
-         * contain it.
-         */
+        /* Create card only if it does not already exist */
 
         if (!bestSellingElement) {
 
@@ -2029,30 +2353,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 totalSalesElement.parentElement
             ) {
 
-                const card =
+                bestSellingElement =
                     document.createElement("div");
 
 
-                card.id =
+                bestSellingElement.id =
                     "best-selling-product";
 
 
-                card.className =
+                bestSellingElement.className =
                     "dashboard-stat-card best-selling-card";
 
 
                 totalSalesElement.parentElement
                     .insertAdjacentElement(
                         "afterend",
-                        card
+                        bestSellingElement
                     );
-
-
-                bestSellingElement =
-                    card;
-
             }
-
         }
 
 
@@ -2063,7 +2381,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* =================================================
            NO SALES
-        ================================================== */
+        ================================================= */
 
         if (
             !Array.isArray(sellerOrders) ||
@@ -2098,65 +2416,64 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* =================================================
-           CALCULATE PRODUCT SALES
-        ================================================== */
-
         const productSales = {};
 
 
-        sellerOrders.forEach(function (sellerOrder) {
+        sellerOrders.forEach(
+            function (sellerOrder) {
 
-            const order =
-                sellerOrder.order;
-
-
-            /*
-             * Cancelled orders should not count.
-             */
-
-            if (
-                order.status ===
-                "Cancelled"
-            ) {
-                return;
-            }
+                const status =
+                    getOrderStatus(
+                        sellerOrder.order
+                    );
 
 
-            sellerOrder.items.forEach(function (item) {
-
-                const productId =
-                    item.productId ??
-                    item.productName;
-
-
-                if (!productSales[productId]) {
-
-                    productSales[productId] = {
-
-                        name:
-                            item.productName ||
-                            "Product",
-
-                        quantity: 0,
-
-                        sales: 0
-
-                    };
-
+                if (status === "Cancelled") {
+                    return;
                 }
 
 
-                productSales[productId].quantity +=
-                    Number(item.quantity || 0);
+                sellerOrder.items.forEach(
+                    function (item) {
+
+                        const productId =
+                            item.productId ??
+                            item.productName;
 
 
-                productSales[productId].sales +=
-                    Number(item.totalAmount || 0);
+                        if (
+                            !productSales[productId]
+                        ) {
 
-            });
+                            productSales[productId] = {
 
-        });
+                                name:
+                                    item.productName ||
+                                    "Product",
+
+                                quantity:
+                                    0,
+
+                                sales:
+                                    0
+                            };
+                        }
+
+
+                        productSales[productId].quantity +=
+                            Number(
+                                item.quantity
+                            ) || 0;
+
+
+                        productSales[productId].sales +=
+                            Number(
+                                item.totalAmount
+                            ) || 0;
+                    }
+                );
+            }
+        );
 
 
         const products =
@@ -2193,38 +2510,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-         * Highest quantity sold wins.
-         * If quantity is equal, higher sales wins.
-         */
+        products.sort(
+            function (a, b) {
 
-        products.sort(function (a, b) {
+                if (
+                    b.quantity !==
+                    a.quantity
+                ) {
 
-            if (b.quantity !== a.quantity) {
+                    return (
+                        b.quantity -
+                        a.quantity
+                    );
+                }
+
 
                 return (
-                    b.quantity -
-                    a.quantity
+                    b.sales -
+                    a.sales
                 );
-
             }
-
-
-            return (
-                b.sales -
-                a.sales
-            );
-
-        });
+        );
 
 
         const bestProduct =
             products[0];
 
-
-        /* =================================================
-           DISPLAY BEST PRODUCT
-        ================================================== */
 
         bestSellingElement.innerHTML = `
 
@@ -2243,20 +2554,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                     <strong class="best-selling-name">
+
                         ${escapeHtml(
                             bestProduct.name
                         )}
+
                     </strong>
 
 
                     <p class="best-selling-quantity">
 
                         ${bestProduct.quantity}
+
                         ${
                             bestProduct.quantity === 1
                                 ? "unit"
                                 : "units"
                         }
+
                         sold
 
                     </p>
@@ -2276,7 +2591,6 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
 
         `;
-
     }
 
 
@@ -2290,30 +2604,23 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelectorAll(
                 ".order-status-select"
             )
-            .forEach(function (select) {
+            .forEach(
+                function (select) {
 
-                select.addEventListener(
-                    "change",
-                    function () {
+                    select.addEventListener(
+                        "change",
+                        function () {
 
-                        const orderId =
-                            select.dataset.orderId;
+                            updateOrderStatus(
+                                select.dataset.orderId,
+                                select.value
+                            );
 
+                        }
+                    );
 
-                        const newStatus =
-                            select.value;
-
-
-                        updateOrderStatus(
-                            orderId,
-                            newStatus
-                        );
-
-                    }
-                );
-
-            });
-
+                }
+            );
     }
 
 
@@ -2362,7 +2669,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             ).length > 0
                         )
                     );
-
                 }
             );
 
@@ -2382,16 +2688,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         orders[index].updatedAt =
-            new Date().toLocaleString(
-                "en-IN"
-            );
+            new Date().toLocaleString("en-IN");
 
 
         saveOrders(orders);
 
 
         displaySellerOrders();
-
     }
 
 
@@ -2411,7 +2714,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             openEditStoreForm
         );
-
     }
 
 
@@ -2431,7 +2733,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "submit",
             updateStoreInformation
         );
-
     }
 
 
@@ -2451,12 +2752,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             closeEditStoreForm
         );
-
     }
 
 
     /* =====================================================
-       INITIALIZE DASHBOARD
+       INITIALIZE
     ===================================================== */
 
     loadSellerInformation();

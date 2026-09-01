@@ -2,42 +2,29 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>ShopSphere | Products</title>
 
     <link rel="stylesheet" href="../css/style.css">
-
 </head>
 
 <body>
 
 <!-- =====================================================
      HEADER
-===================================================== -->
+====================================================== -->
 
 <header class="site-header">
 
     <div class="header-container">
 
-        <!-- LOGO -->
-
         <div class="logo">
-
-            <a href="../index.html">
-                ShopSphere
-            </a>
-
+            <a href="../index.html">ShopSphere</a>
         </div>
 
-
-        <!-- HEADER SEARCH -->
-
         <div class="search-container">
-
             <form action="#" method="get">
 
                 <label for="header-search">
@@ -56,38 +43,17 @@
                 </button>
 
             </form>
-
         </div>
-
-
-        <!-- NAVIGATION -->
 
         <nav class="main-navigation">
 
-            <a href="../index.html">
-                Home
-            </a>
-
-            <a href="products.html">
-                Products
-            </a>
-
-            <a href="vendors.html">
-                Sellers
-            </a>
-
-            <a href="about.html">
-                About
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
+            <a href="../index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="vendors.html">Sellers</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
 
         </nav>
-
-
-        <!-- HEADER ACTIONS -->
 
         <div class="header-actions">
 
@@ -112,35 +78,27 @@
 
 <!-- =====================================================
      MAIN CONTENT
-===================================================== -->
+====================================================== -->
 
 <main>
 
-    <!-- =================================================
-         PRODUCTS INTRODUCTION
-    ================================================== -->
+    <!-- PRODUCTS INTRODUCTION -->
 
     <section class="products-header">
 
         <div class="breadcrumb">
 
-            <a href="../index.html">
-                Home
-            </a>
+            <a href="../index.html">Home</a>
 
             <span>/</span>
 
-            <span>
-                Products
-            </span>
+            <span>Products</span>
 
         </div>
-
 
         <h1>
             Discover products you'll love
         </h1>
-
 
         <p>
             Shop quality products from trusted sellers,
@@ -158,29 +116,25 @@
 
         <div class="category-filter">
 
-            <h2>
-                Browse Categories
-            </h2>
+            <h2>Browse Categories</h2>
 
             <div class="category-links">
 
-                <a href="#">
-                    All
-                </a>
+                <a href="#" data-category="all">All</a>
 
-                <a href="#">
+                <a href="#" data-category="fashion">
                     Fashion
                 </a>
 
-                <a href="#">
+                <a href="#" data-category="electronics">
                     Electronics
                 </a>
 
-                <a href="#">
+                <a href="#" data-category="home-kitchen">
                     Home &amp; Kitchen
                 </a>
 
-                <a href="#">
+                <a href="#" data-category="beauty">
                     Beauty
                 </a>
 
@@ -197,24 +151,18 @@
 
     <section class="products-area">
 
-        <!-- =================================================
-             FILTER SIDEBAR
-        ================================================== -->
+        <!-- FILTER SIDEBAR -->
 
         <aside class="filter-sidebar">
 
-            <h2>
-                Filters
-            </h2>
+            <h2>Filters</h2>
 
 
-            <!-- CATEGORY -->
+            <!-- CATEGORY FILTER -->
 
             <div class="filter-group">
 
-                <h3>
-                    Category
-                </h3>
+                <h3>Category</h3>
 
                 <label>
                     <input
@@ -255,13 +203,11 @@
             </div>
 
 
-            <!-- PRICE -->
+            <!-- PRICE FILTER -->
 
             <div class="filter-group">
 
-                <h3>
-                    Price
-                </h3>
+                <h3>Price</h3>
 
                 <label>
                     <input
@@ -302,13 +248,11 @@
             </div>
 
 
-            <!-- RATING -->
+            <!-- RATING FILTER -->
 
             <div class="filter-group">
 
-                <h3>
-                    Customer Rating
-                </h3>
+                <h3>Customer Rating</h3>
 
                 <label>
                     <input
@@ -331,13 +275,11 @@
             </div>
 
 
-            <!-- AVAILABILITY -->
+            <!-- AVAILABILITY FILTER -->
 
             <div class="filter-group">
 
-                <h3>
-                    Availability
-                </h3>
+                <h3>Availability</h3>
 
                 <label>
                     <input
@@ -367,15 +309,15 @@
 
         <div class="products-content">
 
-
             <!-- TOOLBAR -->
 
             <div class="products-toolbar">
 
-                <p>
+                <!-- JavaScript will update this -->
+
+                <p id="product-count">
                     Showing 1–24 of 24 products
                 </p>
-
 
                 <div class="sort-products">
 
@@ -383,10 +325,7 @@
                         Sort by:
                     </label>
 
-                    <select
-                        id="sort"
-                        name="sort"
-                    >
+                    <select id="sort" name="sort">
 
                         <option value="recommended">
                             Recommended
@@ -416,15 +355,13 @@
 
 
             <!-- =================================================
-                 PRODUCTS GRID
+                 ORIGINAL 24 PRODUCTS
             ================================================== -->
 
             <div class="products-grid">
 
 
-                <!-- =================================================
-                     PRODUCT 1 - CLASSIC BLACK T-SHIRT
-                ================================================== -->
+                <!-- PRODUCT 1 -->
 
                 <article
                     class="product-card"
@@ -486,9 +423,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 2 - EVERYDAY RUNNING SHOES
-                ================================================== -->
+                <!-- PRODUCT 2 -->
 
                 <article
                     class="product-card"
@@ -550,9 +485,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 3 - CASUAL EVERYDAY JACKET
-                ================================================== -->
+                <!-- PRODUCT 3 -->
 
                 <article
                     class="product-card"
@@ -614,9 +547,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 4 - CLASSIC EVERYDAY HANDBAG
-                ================================================== -->
+                <!-- PRODUCT 4 -->
 
                 <article
                     class="product-card"
@@ -678,9 +609,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 5 - CLASSIC SUNGLASSES
-                ================================================== -->
+                <!-- PRODUCT 5 -->
 
                 <article
                     class="product-card"
@@ -742,9 +671,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 6 - COMFORT FIT HOODIE
-                ================================================== -->
+                <!-- PRODUCT 6 -->
 
                 <article
                     class="product-card"
@@ -806,9 +733,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 7 - WIRELESS HEADPHONES
-                ================================================== -->
+                <!-- PRODUCT 7 -->
 
                 <article
                     class="product-card"
@@ -870,9 +795,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 8 - SMART WATCH
-                ================================================== -->
+                <!-- PRODUCT 8 -->
 
                 <article
                     class="product-card"
@@ -934,9 +857,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 9 - PORTABLE BLUETOOTH SPEAKER
-                ================================================== -->
+                <!-- PRODUCT 9 -->
 
                 <article
                     class="product-card"
@@ -998,9 +919,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 10 - MODERN SMARTPHONE
-                ================================================== -->
+                <!-- PRODUCT 10 -->
 
                 <article
                     class="product-card"
@@ -1062,9 +981,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 11 - SLIM PERFORMANCE LAPTOP
-                ================================================== -->
+                <!-- PRODUCT 11 -->
 
                 <article
                     class="product-card"
@@ -1126,9 +1043,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 12 - WIRELESS COMPUTER MOUSE
-                ================================================== -->
+                <!-- PRODUCT 12 -->
 
                 <article
                     class="product-card"
@@ -1190,9 +1105,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 13 - AUTOMATIC COFFEE MAKER
-                ================================================== -->
+                <!-- PRODUCT 13 -->
 
                 <article
                     class="product-card"
@@ -1254,9 +1167,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 14 - MODERN TABLE LAMP
-                ================================================== -->
+                <!-- PRODUCT 14 -->
 
                 <article
                     class="product-card"
@@ -1318,9 +1229,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 15 - DIGITAL AIR FRYER
-                ================================================== -->
+                <!-- PRODUCT 15 -->
 
                 <article
                     class="product-card"
@@ -1382,9 +1291,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 16 - MULTI-PURPOSE ORGANIZER
-                ================================================== -->
+                <!-- PRODUCT 16 -->
 
                 <article
                     class="product-card"
@@ -1446,9 +1353,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 17 - INSULATED WATER BOTTLE
-                ================================================== -->
+                <!-- PRODUCT 17 -->
 
                 <article
                     class="product-card"
@@ -1510,9 +1415,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 18 - PREMIUM COTTON BEDSHEET
-                ================================================== -->
+                <!-- PRODUCT 18 -->
 
                 <article
                     class="product-card"
@@ -1574,9 +1477,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 19 - SKINCARE ESSENTIALS
-                ================================================== -->
+                <!-- PRODUCT 19 -->
 
                 <article
                     class="product-card"
@@ -1638,9 +1539,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 20 - EVERYDAY EAU DE PARFUM
-                ================================================== -->
+                <!-- PRODUCT 20 -->
 
                 <article
                     class="product-card"
@@ -1702,9 +1601,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 21 - DAILY FACE MOISTURIZER
-                ================================================== -->
+                <!-- PRODUCT 21 -->
 
                 <article
                     class="product-card"
@@ -1766,9 +1663,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 22 - DAILY CARE SHAMPOO
-                ================================================== -->
+                <!-- PRODUCT 22 -->
 
                 <article
                     class="product-card"
@@ -1830,9 +1725,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 23 - EVERYDAY MAKEUP KIT
-                ================================================== -->
+                <!-- PRODUCT 23 -->
 
                 <article
                     class="product-card"
@@ -1894,9 +1787,7 @@
                 </article>
 
 
-                <!-- =================================================
-                     PRODUCT 24 - COMPACT HAIR DRYER
-                ================================================== -->
+                <!-- PRODUCT 24 -->
 
                 <article
                     class="product-card"
@@ -1969,11 +1860,17 @@
                 aria-label="Product pages"
             >
 
-                <a href="#" aria-label="Previous page">
+                <a
+                    href="#"
+                    aria-label="Previous page"
+                >
                     ←
                 </a>
 
-                <a href="#" class="active">
+                <a
+                    href="#"
+                    class="active"
+                >
                     1
                 </a>
 
@@ -1985,7 +1882,10 @@
                     3
                 </a>
 
-                <a href="#" aria-label="Next page">
+                <a
+                    href="#"
+                    aria-label="Next page"
+                >
                     →
                 </a>
 
@@ -2000,7 +1900,7 @@
 
 <!-- =====================================================
      FOOTER
-===================================================== -->
+====================================================== -->
 
 <footer class="site-footer">
 
@@ -2008,9 +1908,7 @@
 
         <div class="footer-column">
 
-            <h3>
-                ShopSphere
-            </h3>
+            <h3>ShopSphere</h3>
 
             <p>
                 Discover products from trusted sellers
@@ -2022,59 +1920,31 @@
 
         <div class="footer-column">
 
-            <h3>
-                Shop
-            </h3>
+            <h3>Shop</h3>
 
-            <a href="../index.html">
-                Home
-            </a>
-
-            <a href="products.html">
-                Products
-            </a>
-
-            <a href="vendors.html">
-                Sellers
-            </a>
-
-            <a href="cart.html">
-                Cart
-            </a>
+            <a href="../index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="vendors.html">Sellers</a>
+            <a href="cart.html">Cart</a>
 
         </div>
 
 
         <div class="footer-column">
 
-            <h3>
-                Information
-            </h3>
+            <h3>Information</h3>
 
-            <a href="about.html">
-                About Us
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
-
-            <a href="#">
-                Privacy Policy
-            </a>
-
-            <a href="#">
-                Terms &amp; Conditions
-            </a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms &amp; Conditions</a>
 
         </div>
 
 
         <div class="footer-column">
 
-            <h3>
-                Customer Support
-            </h3>
+            <h3>Customer Support</h3>
 
             <p>
                 support@shopsphere.com
@@ -2106,36 +1976,10 @@
 
 <!-- =====================================================
      JAVASCRIPT
-===================================================== -->
+====================================================== -->
 
 <script src="../js/script.js"></script>
-
 <script src="../js/store.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const productCards = document.querySelectorAll(".product-card");
-
-    productCards.forEach(function (card) {
-
-        const productNameElement = card.querySelector("h3");
-        const viewDetailsLink = card.querySelector(".product-actions a");
-
-        if (productNameElement && viewDetailsLink) {
-
-            const productName = productNameElement.textContent.trim();
-
-            viewDetailsLink.href =
-                "product-details.html?product=" +
-                encodeURIComponent(productName);
-
-        }
-
-    });
-
-});
-</script>
 
 </body>
 
