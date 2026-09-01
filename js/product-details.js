@@ -143,14 +143,27 @@ document.addEventListener("DOMContentLoaded", function () {
         },
 
         "Automatic Coffee Maker": {
-            category: "Home & Kitchen",
-            image: "../images/coffee-maker.jpg",
-            price: 3499,
-            rating: 4,
-            reviews: "74 reviews",
-            seller: "Home Store",
-            description: "Brew fresh coffee conveniently from the comfort of home."
-        },
+           category: "Home & Kitchen",
+           image: "../images/coffee-maker.jpg",
+        price: 3499,
+    rating: 4,
+    reviews: "74 reviews",
+    seller: "Home Store",
+    description: "Brew fresh coffee conveniently from the comfort of home."
+},
+
+"Coffee Maker": {
+    category: "Home & Kitchen",
+    image: "../images/coffee-maker.jpg",
+    price: 3499,
+    rating: 4,
+    reviews: "74 reviews",
+    seller: "Home Store",
+    description: "Brew fresh coffee conveniently from the comfort of home."
+},
+
+
+        
 
         "Modern Table Lamp": {
             category: "Home & Kitchen",
