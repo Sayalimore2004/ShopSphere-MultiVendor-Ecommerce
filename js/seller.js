@@ -1,8 +1,3 @@
-/* =========================================================
-   SHOPSPHERE
-   SELLER PAGE JAVASCRIPT
-========================================================= */
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const sellerForm =
@@ -26,7 +21,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sellerMessage.className =
             "seller-message " + type;
+    }
 
+
+    /* =====================================================
+       CHECK FORM
+    ===================================================== */
+
+    if (!sellerForm) {
+
+        console.error(
+            "Seller form not found."
+        );
+
+        return;
     }
 
 
@@ -34,171 +42,223 @@ document.addEventListener("DOMContentLoaded", function () {
        FORM SUBMISSION
     ===================================================== */
 
-    if (!sellerForm) {
-        console.error("Seller form not found.");
-        return;
-    }
+    sellerForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
 
 
-    sellerForm.addEventListener("submit", function (event) {
+            /* =================================================
+               GET FORM VALUES
+            ================================================= */
 
-        /* STOP PAGE RELOAD */
-        event.preventDefault();
-
-
-        /* =================================================
-           GET FORM VALUES
-        ================================================= */
-
-        const name =
-            document
-                .getElementById("seller-name")
-                .value
-                .trim();
+            const name =
+                document
+                    .getElementById("seller-name")
+                    .value
+                    .trim();
 
 
-        const email =
-            document
-                .getElementById("seller-email")
-                .value
-                .trim()
-                .toLowerCase();
+            const email =
+                document
+                    .getElementById("seller-email")
+                    .value
+                    .trim()
+                    .toLowerCase();
 
 
-        const storeName =
-            document
-                .getElementById("store-name")
-                .value
-                .trim();
+            const password =
+                document
+                    .getElementById("seller-password")
+                    .value
+                    .trim();
 
 
-        const category =
-            document
-                .getElementById("seller-category")
-                .value;
+            const storeName =
+                document
+                    .getElementById("store-name")
+                    .value
+                    .trim();
 
 
-        /* =================================================
-           VALIDATION
-        ================================================= */
+            const category =
+                document
+                    .getElementById("seller-category")
+                    .value;
 
-        if (
-            name === "" ||
-            email === "" ||
-            storeName === "" ||
-            category === ""
-        ) {
 
-            showSellerMessage(
-                "Please fill in all the required details.",
-                "error"
+            /* =================================================
+               VALIDATION
+            ================================================= */
+
+            if (
+                name === "" ||
+                email === "" ||
+                password === "" ||
+                storeName === "" ||
+                category === ""
+            ) {
+
+                showSellerMessage(
+                    "Please fill in all the required details.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               EMAIL VALIDATION
+            ================================================= */
+
+            const emailPattern =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+            if (!emailPattern.test(email)) {
+
+                showSellerMessage(
+                    "Please enter a valid email address.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               PASSWORD VALIDATION
+            ================================================= */
+
+            if (password.length < 6) {
+
+                showSellerMessage(
+                    "Password must be at least 6 characters.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               CREATE SELLER
+            ================================================= */
+
+            const seller = {
+
+                id: Date.now(),
+
+                name: name,
+
+                email: email,
+
+                password: password,
+
+                storeName: storeName,
+
+                category: category,
+
+                status: "Active",
+
+                submittedAt:
+                    new Date().toLocaleString("en-IN")
+
+            };
+
+
+            /* =================================================
+               GET EXISTING SELLERS
+            ================================================= */
+
+            let sellers =
+                JSON.parse(
+                    localStorage.getItem(
+                        "shopSphereSellerApplications"
+                    )
+                ) || [];
+
+
+            if (!Array.isArray(sellers)) {
+
+                sellers = [];
+
+            }
+
+
+            /* =================================================
+               CHECK DUPLICATE EMAIL
+            ================================================= */
+
+            const existingSeller =
+                sellers.find(
+                    function (existing) {
+
+                        return (
+                            existing.email ===
+                            email
+                        );
+
+                    }
+                );
+
+
+            if (existingSeller) {
+
+                showSellerMessage(
+                    "A seller account with this email already exists.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               SAVE SELLER
+            ================================================= */
+
+            sellers.push(seller);
+
+
+            localStorage.setItem(
+                "shopSphereSellerApplications",
+                JSON.stringify(sellers)
             );
 
-            return;
-        }
 
+            /* =================================================
+               SAVE CURRENT SELLER
+            ================================================= */
 
-        /* =================================================
-           EMAIL VALIDATION
-        ================================================= */
-
-        const emailPattern =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-        if (!emailPattern.test(email)) {
-
-            showSellerMessage(
-                "Please enter a valid email address.",
-                "error"
+            localStorage.setItem(
+                "shopSphereCurrentSeller",
+                JSON.stringify(seller)
             );
 
-            return;
-        }
+
+            /* =================================================
+               SUCCESS
+            ================================================= */
+
+            showSellerMessage(
+                "Seller account created successfully!",
+                "success"
+            );
 
 
-        /* =================================================
-           CREATE SELLER APPLICATION
-        ================================================= */
+            /* =================================================
+               REDIRECT
+            ================================================= */
 
-        const application = {
+            sellerForm.reset();
 
-            id: Date.now(),
-
-            name: name,
-
-            email: email,
-
-            storeName: storeName,
-
-            category: category,
-
-            status: "Pending",
-
-            submittedAt:
-                new Date().toLocaleString("en-IN")
-
-        };
-
-
-        /* =================================================
-           GET EXISTING APPLICATIONS
-        ================================================= */
-
-        let applications =
-            JSON.parse(
-                localStorage.getItem(
-                    "shopSphereSellerApplications"
-                )
-            ) || [];
-
-
-        if (!Array.isArray(applications)) {
-
-            applications = [];
+            window.location.href =
+                "seller-dashboard.html";
 
         }
-
-
-        /* =================================================
-           SAVE APPLICATION
-        ================================================= */
-
-        applications.push(application);
-
-
-        localStorage.setItem(
-            "shopSphereSellerApplications",
-            JSON.stringify(applications)
-        );
-
-
-        /* =================================================
-           SUCCESS MESSAGE
-        ================================================= */
-
-        showSellerMessage(
-            "Seller application submitted successfully!",
-            "success"
-        );
-
-
-        /* =================================================
-           CLEAR FORM
-        ================================================= */
-
-        sellerForm.reset();
-
-
-        /* =================================================
-           SCROLL TO MESSAGE
-        ================================================= */
-
-        sellerMessage.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-
-    });
+    );
 
 });

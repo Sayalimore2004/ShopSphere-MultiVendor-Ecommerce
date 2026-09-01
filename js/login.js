@@ -3,245 +3,330 @@
    LOGIN PAGE JAVASCRIPT
 ========================================================= */
 
+document.addEventListener("DOMContentLoaded", function () {
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+    const loginForm =
+        document.getElementById("login-form");
 
-const loginForm =
-    document.getElementById("login-form");
+    const loginEmail =
+        document.getElementById("login-email");
 
-const loginEmail =
-    document.getElementById("login-email");
+    const loginPassword =
+        document.getElementById("login-password");
 
-const loginPassword =
-    document.getElementById("login-password");
+    const loginMessage =
+        document.getElementById("login-message");
 
-const loginMessage =
-    document.getElementById("login-message");
-
-const forgotPassword =
-    document.getElementById("forgot-password");
+    const forgotPassword =
+        document.getElementById("forgot-password");
 
 
-/* =========================================================
-   SHOW MESSAGE
-========================================================= */
+    /* =====================================================
+       SHOW MESSAGE
+    ===================================================== */
 
-function showLoginMessage(message, type) {
+    function showLoginMessage(message, type) {
 
-    if (!loginMessage) {
-        return;
-    }
-
-    loginMessage.textContent = message;
-
-    loginMessage.className =
-        "login-message " + type;
-}
-
-
-/* =========================================================
-   GET USERS
-========================================================= */
-
-function getUsers() {
-
-    const savedUsers =
-        localStorage.getItem("shopSphereUsers");
-
-
-    if (!savedUsers) {
-        return [];
-    }
-
-
-    try {
-
-        const users =
-            JSON.parse(savedUsers);
-
-
-        if (Array.isArray(users)) {
-            return users;
+        if (!loginMessage) {
+            return;
         }
 
+        loginMessage.textContent =
+            message;
 
-        return [];
+        loginMessage.className =
+            "login-message " + type;
 
-    } catch (error) {
-
-        console.error(
-            "Error reading users:",
-            error
-        );
-
-        return [];
     }
-}
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
+    /* =====================================================
+       GET SELLERS
+    ===================================================== */
 
-if (loginForm) {
+    function getSellers() {
 
-    loginForm.addEventListener(
-        "submit",
-        function (event) {
+        try {
 
-            event.preventDefault();
+            const savedSellers =
+                JSON.parse(
+                    localStorage.getItem(
+                        "shopSphereSellerApplications"
+                    )
+                ) || [];
 
+            return Array.isArray(savedSellers)
+                ? savedSellers
+                : [];
 
-            const email =
-                loginEmail.value
-                    .trim()
-                    .toLowerCase();
+        } catch (error) {
 
+            console.error(
+                "Error reading sellers:",
+                error
+            );
 
-            const password =
-                loginPassword.value;
+            return [];
 
+        }
 
-            /* -----------------------------------------
-               EMAIL VALIDATION
-            ----------------------------------------- */
-
-            if (email === "") {
-
-                showLoginMessage(
-                    "Please enter your email address.",
-                    "error"
-                );
-
-                loginEmail.focus();
-
-                return;
-            }
+    }
 
 
-            /* -----------------------------------------
-               PASSWORD VALIDATION
-            ----------------------------------------- */
+    /* =====================================================
+       GET CUSTOMERS
+    ===================================================== */
 
-            if (password === "") {
+    function getUsers() {
 
-                showLoginMessage(
-                    "Please enter your password.",
-                    "error"
-                );
+        try {
 
-                loginPassword.focus();
+            const savedUsers =
+                JSON.parse(
+                    localStorage.getItem(
+                        "shopSphereUsers"
+                    )
+                ) || [];
 
-                return;
-            }
+            return Array.isArray(savedUsers)
+                ? savedUsers
+                : [];
+
+        } catch (error) {
+
+            console.error(
+                "Error reading users:",
+                error
+            );
+
+            return [];
+
+        }
+
+    }
 
 
-            /* -----------------------------------------
-               GET USERS
-            ----------------------------------------- */
+    /* =====================================================
+       LOGIN
+    ===================================================== */
 
-            const users =
-                getUsers();
+    if (loginForm) {
+
+        loginForm.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
 
 
-            /* -----------------------------------------
-               FIND USER
-            ----------------------------------------- */
+                const email =
+                    loginEmail.value
+                        .trim()
+                        .toLowerCase();
 
-            const user =
-                users.find(function (item) {
 
-                    return (
-                        item.email &&
-                        item.email.toLowerCase() === email &&
-                        item.password === password
+                const password =
+                    loginPassword.value;
+
+
+                /* =========================================
+                   VALIDATION
+                ========================================= */
+
+                if (email === "") {
+
+                    showLoginMessage(
+                        "Please enter your email address.",
+                        "error"
                     );
 
-                });
+                    loginEmail.focus();
+
+                    return;
+
+                }
 
 
-            /* -----------------------------------------
-               INVALID LOGIN
-            ----------------------------------------- */
+                if (password === "") {
 
-            if (!user) {
+                    showLoginMessage(
+                        "Please enter your password.",
+                        "error"
+                    );
 
-                showLoginMessage(
-                    "Invalid email or password.",
-                    "error"
+                    loginPassword.focus();
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   CHECK SELLER LOGIN FIRST
+                ========================================= */
+
+                const sellers =
+                    getSellers();
+
+
+                const seller =
+                    sellers.find(
+                        function (item) {
+
+                            return (
+                                item.email &&
+                                item.email.toLowerCase() ===
+                                    email &&
+                                item.password ===
+                                    password
+                            );
+
+                        }
+                    );
+
+
+                if (seller) {
+
+                    /* Save currently logged-in seller */
+
+                    localStorage.setItem(
+                        "shopSphereCurrentSeller",
+                        JSON.stringify(seller)
+                    );
+
+
+                    localStorage.setItem(
+                        "shopSphereUserType",
+                        "seller"
+                    );
+
+
+                    showLoginMessage(
+                        "Seller login successful! Redirecting...",
+                        "success"
+                    );
+
+
+                    setTimeout(
+                        function () {
+
+                            window.location.href =
+                                "seller-dashboard.html";
+
+                        },
+                        700
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   CHECK CUSTOMER LOGIN
+                ========================================= */
+
+                const users =
+                    getUsers();
+
+
+                const user =
+                    users.find(
+                        function (item) {
+
+                            return (
+                                item.email &&
+                                item.email.toLowerCase() ===
+                                    email &&
+                                item.password ===
+                                    password
+                            );
+
+                        }
+                    );
+
+
+                if (!user) {
+
+                    showLoginMessage(
+                        "Invalid email or password.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                /* Save logged-in customer */
+
+                const loggedInUser = {
+
+                    id: user.id,
+
+                    name: user.name,
+
+                    email: user.email
+
+                };
+
+
+                localStorage.setItem(
+                    "shopSphereLoggedInUser",
+                    JSON.stringify(
+                        loggedInUser
+                    )
                 );
 
-                return;
+
+                localStorage.setItem(
+                    "shopSphereUserType",
+                    "customer"
+                );
+
+
+                showLoginMessage(
+                    "Login successful! Redirecting...",
+                    "success"
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "../index.html";
+
+                    },
+                    700
+                );
+
             }
+        );
+
+    }
 
 
-            /* -----------------------------------------
-               SAVE LOGGED-IN USER
-            ----------------------------------------- */
+    /* =====================================================
+       FORGOT PASSWORD
+    ===================================================== */
 
-            const loggedInUser = {
+    if (forgotPassword) {
 
-                id: user.id,
+        forgotPassword.addEventListener(
+            "click",
+            function (event) {
 
-                name: user.name,
+                event.preventDefault();
 
-                email: user.email
+                alert(
+                    "Password reset functionality will be added later."
+                );
 
-            };
+            }
+        );
 
+    }
 
-            localStorage.setItem(
-                "shopSphereLoggedInUser",
-                JSON.stringify(loggedInUser)
-            );
-
-
-            /* -----------------------------------------
-               SUCCESS
-            ----------------------------------------- */
-
-            showLoginMessage(
-                "Login successful! Redirecting...",
-                "success"
-            );
-
-
-            /* -----------------------------------------
-               REDIRECT
-            ----------------------------------------- */
-
-            setTimeout(function () {
-
-                window.location.href =
-                    "../index.html";
-
-            }, 1000);
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   FORGOT PASSWORD
-========================================================= */
-
-if (forgotPassword) {
-
-    forgotPassword.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            alert(
-                "Password reset functionality will be added soon."
-            );
-
-        }
-    );
-
-}
+});

@@ -280,25 +280,29 @@
         }
 
 
-        return {
+       return {
 
-            id: name,
+    id: card.dataset.sellerProductId || name,
 
-            name: name,
+    name: name,
 
-            price: price,
+    price: price,
 
-            category: category,
+    category: category,
 
-            seller: seller,
+    seller: seller,
 
-            image: image,
+    sellerId: card.dataset.sellerId || "",
 
-            rating: rating,
+    sellerName: seller,
 
-            quantity: 1
+    image: image,
 
-        };
+    rating: rating,
+
+    quantity: 1
+
+};
 
     }
 
@@ -307,6 +311,285 @@
     /* =========================================================
        PRODUCTS PAGE
     ========================================================= */
+
+function loadSellerProducts() {
+
+    const productGrid =
+        document.querySelector(".products-grid");
+
+    if (!productGrid) {
+        return;
+    }
+
+
+    /* =====================================================
+       GET SELLER PRODUCTS
+    ===================================================== */
+
+    let sellerProducts = [];
+
+    try {
+
+        sellerProducts =
+            JSON.parse(
+                localStorage.getItem(
+                    "shopSphereSellerProducts"
+                )
+            ) || [];
+
+    } catch (error) {
+
+        console.error(
+            "Could not read seller products:",
+            error
+        );
+
+        sellerProducts = [];
+
+    }
+
+
+    console.log(
+        "SELLER PRODUCTS FROM STORAGE:",
+        sellerProducts
+    );
+
+
+    /* =====================================================
+       ONLY APPROVED PRODUCTS
+    ===================================================== */
+
+    const approvedProducts =
+        sellerProducts.filter(
+            function (product) {
+
+                return (
+                    product &&
+                    String(product.status)
+                        .toLowerCase()
+                        .trim() ===
+                    "approved"
+                );
+
+            }
+        );
+
+
+    console.log(
+        "APPROVED PRODUCTS:",
+        approvedProducts
+    );
+
+
+    /* =====================================================
+       REMOVE OLD SELLER-PRODUCT CARDS
+       Prevents duplicates
+    ===================================================== */
+
+    productGrid
+        .querySelectorAll(
+            ".seller-product-card"
+        )
+        .forEach(
+            function (card) {
+
+                card.remove();
+
+            }
+        );
+
+
+    /* =====================================================
+       ADD APPROVED SELLER PRODUCTS
+    ===================================================== */
+
+    approvedProducts.forEach(
+        function (product) {
+
+            if (
+                !product ||
+                !product.name
+            ) {
+                return;
+            }
+
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "product-card seller-product-card";
+
+
+            /* =================================================
+               DATA
+            ================================================= */
+
+            card.dataset.sellerProductId =
+                product.id;
+
+            card.dataset.productName =
+                product.name;
+
+                card.dataset.sellerId =
+    product.sellerId || "";
+
+            card.dataset.category =
+                String(
+                    product.category || ""
+                )
+                    .toLowerCase()
+                    .replace(
+                        /\s*&\s*/g,
+                        "-"
+                    )
+                    .replace(
+                        /\s+/g,
+                        "-"
+                    );
+
+            card.dataset.seller =
+                product.sellerName ||
+                "ShopSphere Seller";
+
+            card.dataset.price =
+                Number(product.price) || 0;
+
+            card.dataset.rating =
+                Number(product.rating) || 4;
+
+            card.dataset.stock =
+                Number(product.stock) > 0
+                    ? "in-stock"
+                    : "out";
+
+
+            /* =================================================
+               CARD HTML
+            ================================================= */
+
+            card.innerHTML = `
+
+                <div class="product-image">
+
+                    <img
+                        src="${escapeHtml(
+                            product.image || ""
+                        )}"
+                        alt="${escapeHtml(
+                            product.name
+                        )}"
+                        onerror="
+                            this.src='../images/placeholder.jpg';
+                        "
+                    >
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <p class="product-category">
+                        ${escapeHtml(
+                            product.category || ""
+                        )}
+                    </p>
+
+
+                    <h3>
+                        ${escapeHtml(
+                            product.name
+                        )}
+                    </h3>
+
+
+                    <p>
+                        ${escapeHtml(
+                            product.description || ""
+                        )}
+                    </p>
+
+
+                    <div class="product-rating">
+
+                        ★★★★☆
+
+                        <span>
+                            Seller Product
+                        </span>
+
+                    </div>
+
+
+                    <p class="product-price">
+
+                        ${formatPrice(
+                            product.price
+                        )}
+
+                    </p>
+
+
+                    <p class="seller-name">
+
+                        Sold by
+
+                        <strong>
+                            ${escapeHtml(
+                                product.sellerName ||
+                                "ShopSphere Seller"
+                            )}
+                        </strong>
+
+                    </p>
+
+
+                    <div class="product-actions">
+
+                        <a
+                            href="product-details.html?product=${encodeURIComponent(
+                                product.name
+                            )}"
+                        >
+                            View Details
+                        </a>
+
+
+                        <button
+                            type="button"
+                        >
+                            Add to Cart
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+           productGrid.prepend(card);
+
+        }
+    );
+
+
+    console.log(
+        "SELLER PRODUCTS ADDED TO PRODUCTS GRID:",
+        approvedProducts.length
+    );
+
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    loadSellerProducts();
+});
+
+
+
 
     function initializeProductsPage() {
 
@@ -2524,47 +2807,269 @@
        PRODUCT DETAILS PAGE
     ========================================================= */
 
-    function initializeProductDetailsPage() {
+   function initializeProductDetailsPage() {
 
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
+    const productName =
+        params.get("product");
 
-        const productName =
-            params.get(
-                "product"
-            );
-
-
-        if (!productName) {
-            return;
-        }
+    if (!productName) {
+        return;
+    }
 
 
-        /*
-         * This part works with the existing
-         * product-details page if its elements
-         * have the common classes/IDs.
-         */
+    /*
+     * =====================================================
+     * FIND SELLER PRODUCT
+     * =====================================================
+     */
 
-        const productNameElements =
-            document.querySelectorAll(
-                "#product-name, .product-detail-name"
-            );
+    let sellerProducts = [];
+
+    try {
+
+        sellerProducts =
+            JSON.parse(
+                localStorage.getItem(
+                    "shopSphereSellerProducts"
+                )
+            ) || [];
+
+    } catch (error) {
+
+        console.error(
+            "Could not load seller products:",
+            error
+        );
+
+        sellerProducts = [];
+
+    }
 
 
-        productNameElements.forEach(
-            function (element) {
+    /*
+     * Only approved products can be
+     * viewed by customers.
+     */
 
-                element.textContent =
-                    productName;
+    const product =
+        sellerProducts.find(
+            function (item) {
+
+                return (
+                    item &&
+                    item.status === "approved" &&
+                    String(item.name).trim() ===
+                    String(productName).trim()
+                );
 
             }
         );
 
+
+    /*
+     * Product not found
+     */
+
+    if (!product) {
+
+        document.body.innerHTML = `
+            <main style="
+                max-width: 800px;
+                margin: 100px auto;
+                text-align: center;
+                padding: 30px;
+            ">
+
+                <h2>Product Not Found</h2>
+
+                <p>
+                    This product is no longer available.
+                </p>
+
+                <a href="products.html">
+                    Back to Products
+                </a>
+
+            </main>
+        `;
+
+        return;
+
     }
+
+
+    /*
+     * =====================================================
+     * PRODUCT NAME
+     * =====================================================
+     */
+
+    const productNameElements =
+        document.querySelectorAll(
+            "#product-name, .product-detail-name"
+        );
+
+    productNameElements.forEach(
+        function (element) {
+
+            element.textContent =
+                product.name;
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * PRODUCT IMAGE
+     * =====================================================
+     */
+
+    const imageElements =
+        document.querySelectorAll(
+            "#product-image, .product-detail-image img, .product-image-large img"
+        );
+
+    imageElements.forEach(
+        function (image) {
+
+            if (product.image) {
+
+                image.src =
+                    product.image;
+
+            }
+
+            image.alt =
+                product.name;
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * PRICE
+     * =====================================================
+     */
+
+    const priceElements =
+        document.querySelectorAll(
+            "#product-price, .product-detail-price"
+        );
+
+    priceElements.forEach(
+        function (element) {
+
+            element.textContent =
+                formatPrice(
+                    product.price
+                );
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * CATEGORY
+     * =====================================================
+     */
+
+    const categoryElements =
+        document.querySelectorAll(
+            "#product-category, .product-detail-category"
+        );
+
+    categoryElements.forEach(
+        function (element) {
+
+            element.textContent =
+                formatCategory(
+                    product.category
+                );
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * DESCRIPTION
+     * =====================================================
+     */
+
+    const descriptionElements =
+        document.querySelectorAll(
+            "#product-description, .product-detail-description"
+        );
+
+    descriptionElements.forEach(
+        function (element) {
+
+            element.textContent =
+                product.description ||
+                "No description available.";
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * SELLER
+     * =====================================================
+     */
+
+    const sellerElements =
+        document.querySelectorAll(
+            "#product-seller, .product-detail-seller"
+        );
+
+    sellerElements.forEach(
+        function (element) {
+
+            element.textContent =
+                product.sellerName ||
+                "ShopSphere Seller";
+
+        }
+    );
+
+
+    /*
+     * =====================================================
+     * STOCK
+     * =====================================================
+     */
+
+    const stockElements =
+        document.querySelectorAll(
+            "#product-stock, .product-detail-stock"
+        );
+
+    stockElements.forEach(
+        function (element) {
+
+            const stock =
+                Number(
+                    product.stock || 0
+                );
+
+            element.textContent =
+                stock > 0
+                    ? "In Stock"
+                    : "Out of Stock";
+
+        }
+    );
+
+}
 
 
 
@@ -3591,7 +4096,7 @@
                 };
 
 
-
+            console.log("ORDER DATA BEFORE SAVING:", orderData);
                 let orderHistory =
                     JSON.parse(
                         localStorage.getItem(
@@ -3663,6 +4168,8 @@
              */
 
             loadSearchFromUrl();
+
+loadSellerProducts();
 
 initializeProductsPage();
 

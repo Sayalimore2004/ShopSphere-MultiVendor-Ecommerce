@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>ShopSphere | Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css">
+
+    <link
+        rel="stylesheet"
+        href="../css/admin-dashboard.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="site-header">
+
+        <div class="header-container">
+
+            <div class="logo">
+
+                <a href="../index.html">
+                    ShopSphere
+                </a>
+
+            </div>
+
+
+            <nav class="main-navigation">
+
+                <a href="../index.html">
+                    Home
+                </a>
+
+                <a href="products.html">
+                    Products
+                </a>
+
+                <a href="vendors.html">
+                    Sellers
+                </a>
+
+            </nav>
+
+
+            <div class="header-actions">
+
+                <span class="admin-label">
+                    Admin Panel
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         ADMIN DASHBOARD
+    ====================================================== -->
+
+    <main class="admin-dashboard">
+
+
+        <!-- =================================================
+             WELCOME
+        ================================================== -->
+
+        <section class="admin-welcome">
+
+            <div>
+
+                <p class="dashboard-label">
+                    ADMIN CENTER
+                </p>
+
+                <h1>
+                    Admin Dashboard
+                </h1>
+
+                <p>
+                    Manage ShopSphere sellers,
+                    products and approvals.
+                </p>
+
+            </div>
+
+
+            <div class="admin-status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    Admin Active
+                </span>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ADMIN STATISTICS
+        ================================================== -->
+
+        <section class="admin-cards">
+
+
+            <div class="admin-card">
+
+                <p>
+                    Total Products
+                </p>
+
+                <h2 id="admin-total-products">
+                    0
+                </h2>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <p>
+                    Pending Approval
+                </p>
+
+                <h2 id="admin-pending-products">
+                    0
+                </h2>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <p>
+                    Approved Products
+                </p>
+
+                <h2 id="admin-approved-products">
+                    0
+                </h2>
+
+            </div>
+
+
+            <div class="admin-card">
+
+                <p>
+                    Rejected Products
+                </p>
+
+                <h2 id="admin-rejected-products">
+                    0
+                </h2>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUCT APPROVAL
+        ================================================== -->
+
+        <section class="admin-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="section-label">
+                        PRODUCT MANAGEMENT
+                    </p>
+
+                    <h2>
+                        Product Approval
+                    </h2>
+
+                    <p>
+                        Review products submitted by sellers.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FILTER -->
+
+            <div class="admin-filter">
+
+                <label for="admin-product-filter">
+                    Filter Products
+                </label>
+
+
+                <select
+                    id="admin-product-filter">
+
+                    <option value="all">
+                        All Products
+                    </option>
+
+                    <option value="pending">
+                        Pending
+                    </option>
+
+                    <option value="approved">
+                        Approved
+                    </option>
+
+                    <option value="rejected">
+                        Rejected
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- PRODUCT LIST -->
+
+            <div
+                id="admin-product-list"
+                class="admin-product-list">
+
+                <!-- Products loaded by JavaScript -->
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 ShopSphere. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </footer>
+ 
+
+
+    <script
+        src="../js/admin-dashboard.js">
+    </script>
+
+</body>
+
+</html>
