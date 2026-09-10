@@ -1,226 +1,161 @@
 /* =========================================================
-   SHOPSPHERE
-   SELLER DASHBOARD JAVASCRIPT
-
-   FEATURES:
-   - Store Information
-   - Edit Store
-   - Add Product
-   - Edit Product
-   - Delete Product
-   - Stock Management
-   - Order Management
-   - Order Status
-   - Total Products
-   - Total Orders
-   - Total Sales
-   - Platform Commission
-   - Seller Earnings
-   - Best Selling Product
-
-   STORAGE:
-   shopSphereCurrentSeller
-   shopSphereSellerProducts
-   shopSphereOrders
+   SHOPSPHERE SELLER DASHBOARD
+   Complete Backend Connected Version
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    "use strict";
-
-
     /* =====================================================
-       STORAGE KEYS
+       CONFIGURATION
     ===================================================== */
+
+    const API_BASE_URL = "http://localhost:8080/api";
 
     const SELLER_KEY = "shopSphereCurrentSeller";
-    const PRODUCTS_KEY = "shopSphereSellerProducts";
-    const ORDERS_KEY = "shopSphereOrders";
-
-
-    /* =====================================================
-       COMMISSION
-    ===================================================== */
+    const TOKEN_KEY = "shopSphereToken";
 
     const COMMISSION_RATE = 0.10;
 
 
     /* =====================================================
-       STORAGE HELPERS
+       HELPER - GET CURRENT SELLER
     ===================================================== */
 
     function getCurrentSeller() {
 
+        const sellerData =
+            localStorage.getItem(SELLER_KEY);
+
+        if (!sellerData) {
+            return null;
+        }
+
         try {
 
-            const data = localStorage.getItem(SELLER_KEY);
-
-            if (!data) {
-                return null;
-            }
-
-            return JSON.parse(data);
+            return JSON.parse(sellerData);
 
         } catch (error) {
 
-            console.error("Error reading seller:", error);
+            console.error(
+                "Invalid seller data in localStorage:",
+                error
+            );
 
             return null;
         }
     }
 
 
-    function saveCurrentSeller(seller) {
+    /* =====================================================
+       HELPER - API REQUEST
+    ===================================================== */
 
-        try {
+    async function apiRequest(
+        endpoint,
+        options = {}
+    ) {
 
-            localStorage.setItem(
-                SELLER_KEY,
-                JSON.stringify(seller)
+        const token =
+            localStorage.getItem(TOKEN_KEY);
+
+        const headers = {
+
+            "Content-Type":
+                "application/json",
+
+            ...(options.headers || {})
+
+        };
+
+
+        if (token) {
+
+            headers["Authorization"] =
+                "Bearer " + token;
+
+        }
+
+
+        const response =
+            await fetch(
+                API_BASE_URL + endpoint,
+                {
+                    ...options,
+                    headers: headers
+                }
             );
 
-        } catch (error) {
 
-            console.error("Error saving seller:", error);
-        }
-    }
+        if (
+            response.status === 401 ||
+            response.status === 403
+        ) {
 
-
-    function getProducts() {
-
-        try {
-
-            const data =
-                localStorage.getItem(PRODUCTS_KEY);
-
-            if (!data) {
-                return [];
-            }
-
-            const products = JSON.parse(data);
-
-            return Array.isArray(products)
-                ? products
-                : [];
-
-        } catch (error) {
-
-            console.error("Error reading products:", error);
-
-            return [];
-        }
-    }
-
-
-    function saveProducts(products) {
-
-        try {
-
-            localStorage.setItem(
-                PRODUCTS_KEY,
-                JSON.stringify(products)
+            console.error(
+                "Authentication failed."
             );
 
-        } catch (error) {
-
-            console.error("Error saving products:", error);
-        }
-    }
-
-
-    function getOrders() {
-
-        try {
-
-            const data =
-                localStorage.getItem(ORDERS_KEY);
-
-            if (!data) {
-                return [];
-            }
-
-            const orders = JSON.parse(data);
-
-            return Array.isArray(orders)
-                ? orders
-                : [];
-
-        } catch (error) {
-
-            console.error("Error reading orders:", error);
-
-            return [];
-        }
-    }
-
-
-    function saveOrders(orders) {
-
-        try {
-
-            localStorage.setItem(
-                ORDERS_KEY,
-                JSON.stringify(orders)
+            localStorage.removeItem(
+                SELLER_KEY
             );
 
-        } catch (error) {
+            localStorage.removeItem(
+                TOKEN_KEY
+            );
 
-            console.error("Error saving orders:", error);
+            window.location.href =
+                "seller-login.html";
+
+            throw new Error(
+                "Authentication failed"
+            );
+        }
+
+
+        const text =
+            await response.text();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                text ||
+                "Request failed"
+            );
+        }
+
+
+        if (!text) {
+
+            return null;
+        }
+
+
+        try {
+
+            return JSON.parse(text);
+
+        } catch {
+
+            return text;
         }
     }
 
 
     /* =====================================================
-       HTML ESCAPE
+       GET ORDER STATUS
     ===================================================== */
 
-    function escapeHtml(value) {
+    function getOrderStatus(order) {
 
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+        if (!order || !order.status) {
 
-
-    /* =====================================================
-       PRICE FORMAT
-    ===================================================== */
-
-    function formatPrice(value) {
-
-        const number = Number(value);
-
-        if (!Number.isFinite(number)) {
-            return "0";
+            return "PLACED";
         }
 
-        return number.toLocaleString("en-IN", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        });
-    }
-
-
-    /* =====================================================
-       COMMISSION
-    ===================================================== */
-
-    function calculateCommission(amount) {
-
-        const value = Number(amount) || 0;
-
-        return value * COMMISSION_RATE;
-    }
-
-
-    function calculateSellerEarnings(amount) {
-
-        const value = Number(amount) || 0;
-
-        return value - calculateCommission(value);
+        return String(
+            order.status
+        ).toUpperCase();
     }
 
 
@@ -228,484 +163,223 @@ document.addEventListener("DOMContentLoaded", function () {
        LOAD SELLER INFORMATION
     ===================================================== */
 
-    function loadSellerInformation() {
+    async function loadSellerInformation() {
 
-        const seller = getCurrentSeller();
-
-
-        const storeNameElement =
-            document.getElementById("seller-store-name");
+        const seller =
+            getCurrentSeller();
 
 
-        const sellerDetailsElement =
-            document.getElementById("seller-details");
+        if (!seller || !seller.id) {
+
+            window.location.href =
+                "seller-login.html";
+
+            return null;
+        }
 
 
-        const storeInfoName =
-            document.getElementById("store-info-name");
+        try {
+
+            const sellerData =
+                await apiRequest(
+                    `/sellers/${seller.id}`
+                );
 
 
-        const storeInfoOwner =
-            document.getElementById("store-info-owner");
+            /* =================================================
+               UPDATE LOCAL SELLER DATA
+            ================================================= */
+
+            const updatedSeller = {
+
+                ...seller,
+
+                ...sellerData
+
+            };
 
 
-        const storeInfoEmail =
-            document.getElementById("store-info-email");
+            localStorage.setItem(
+                SELLER_KEY,
+                JSON.stringify(updatedSeller)
+            );
 
 
-        const storeInfoCategory =
-            document.getElementById("store-info-category");
+            /* =================================================
+               WELCOME SECTION
+            ================================================= */
 
+            const storeNameElement =
+                document.getElementById(
+                    "seller-store-name"
+                );
 
-        if (!seller) {
 
             if (storeNameElement) {
+
                 storeNameElement.textContent =
+                    sellerData.storeName ||
+                    sellerData.name ||
                     "Vendor Dashboard";
             }
 
+
+            const sellerDetailsElement =
+                document.getElementById(
+                    "seller-details"
+                );
+
+
             if (sellerDetailsElement) {
+
                 sellerDetailsElement.textContent =
-                    "No seller information found.";
+                    `Welcome to ${sellerData.storeName || sellerData.name || "your ShopSphere store"}.`;
             }
+
+
+            /* =================================================
+               STORE INFORMATION
+            ================================================= */
+
+            const storeInfoName =
+                document.getElementById(
+                    "store-info-name"
+                );
+
 
             if (storeInfoName) {
-                storeInfoName.textContent = "—";
+
+                storeInfoName.textContent =
+                    sellerData.storeName ||
+                    sellerData.name ||
+                    "—";
             }
+
+
+            const storeInfoOwner =
+                document.getElementById(
+                    "store-info-owner"
+                );
+
 
             if (storeInfoOwner) {
-                storeInfoOwner.textContent = "—";
+
+                storeInfoOwner.textContent =
+                    sellerData.name ||
+                    "—";
             }
+
+
+            const storeInfoEmail =
+                document.getElementById(
+                    "store-info-email"
+                );
+
 
             if (storeInfoEmail) {
-                storeInfoEmail.textContent = "—";
+
+                storeInfoEmail.textContent =
+                    sellerData.email ||
+                    "—";
             }
+
+
+            const storeInfoCategory =
+                document.getElementById(
+                    "store-info-category"
+                );
+
 
             if (storeInfoCategory) {
-                storeInfoCategory.textContent = "—";
+
+                storeInfoCategory.textContent =
+                    sellerData.category ||
+                    "—";
             }
 
-            return;
-        }
 
+            /* =================================================
+               FILL EDIT STORE FORM
+            ================================================= */
 
-        if (storeNameElement) {
+            const editName =
+                document.getElementById(
+                    "edit-seller-name"
+                );
 
-            storeNameElement.textContent =
-                "Welcome, " +
-                (seller.storeName || "Seller");
-        }
+            const editEmail =
+                document.getElementById(
+                    "edit-seller-email"
+                );
 
+            const editStoreName =
+                document.getElementById(
+                    "edit-store-name"
+                );
 
-        if (sellerDetailsElement) {
+            const editCategory =
+                document.getElementById(
+                    "edit-seller-category"
+                );
 
-            sellerDetailsElement.textContent =
-                (seller.category || "Store") +
-                " store • Owner: " +
-                (seller.name || "Seller");
-        }
 
+            if (editName) {
 
-        if (storeInfoName) {
-
-            storeInfoName.textContent =
-                seller.storeName || "—";
-        }
-
-
-        if (storeInfoOwner) {
-
-            storeInfoOwner.textContent =
-                seller.name || "—";
-        }
-
-
-        if (storeInfoEmail) {
-
-            storeInfoEmail.textContent =
-                seller.email || "—";
-        }
-
-
-        if (storeInfoCategory) {
-
-            storeInfoCategory.textContent =
-                seller.category || "—";
-        }
-    }
-
-
-    /* =====================================================
-       EDIT STORE
-    ===================================================== */
-
-    function openEditStoreForm() {
-
-        const seller = getCurrentSeller();
-
-        if (!seller) {
-
-            alert(
-                "Seller information not found. Please register again."
-            );
-
-            return;
-        }
-
-
-        const container =
-            document.getElementById(
-                "edit-store-form-container"
-            );
-
-
-        if (!container) {
-            return;
-        }
-
-
-        const nameInput =
-            document.getElementById(
-                "edit-seller-name"
-            );
-
-
-        const emailInput =
-            document.getElementById(
-                "edit-seller-email"
-            );
-
-
-        const storeInput =
-            document.getElementById(
-                "edit-store-name"
-            );
-
-
-        const categoryInput =
-            document.getElementById(
-                "edit-seller-category"
-            );
-
-
-        if (nameInput) {
-            nameInput.value = seller.name || "";
-        }
-
-
-        if (emailInput) {
-            emailInput.value = seller.email || "";
-        }
-
-
-        if (storeInput) {
-            storeInput.value =
-                seller.storeName || "";
-        }
-
-
-        if (categoryInput) {
-            categoryInput.value =
-                seller.category || "";
-        }
-
-
-        const message =
-            document.getElementById(
-                "edit-store-message"
-            );
-
-
-        if (message) {
-
-            message.textContent = "";
-
-            message.className =
-                "edit-store-message";
-        }
-
-
-        container.hidden = false;
-
-
-        container.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-    }
-
-
-    function closeEditStoreForm() {
-
-        const container =
-            document.getElementById(
-                "edit-store-form-container"
-            );
-
-
-        const form =
-            document.getElementById(
-                "edit-store-form"
-            );
-
-
-        if (container) {
-            container.hidden = true;
-        }
-
-
-        if (form) {
-            form.reset();
-        }
-    }
-
-
-    function updateStoreInformation(event) {
-
-        event.preventDefault();
-
-
-        const seller = getCurrentSeller();
-
-
-        if (!seller) {
-
-            alert(
-                "Seller information not found. Please register again."
-            );
-
-            return;
-        }
-
-
-        const name =
-            document.getElementById(
-                "edit-seller-name"
-            )?.value.trim() || "";
-
-
-        const email =
-            document.getElementById(
-                "edit-seller-email"
-            )?.value.trim() || "";
-
-
-        const storeName =
-            document.getElementById(
-                "edit-store-name"
-            )?.value.trim() || "";
-
-
-        const category =
-            document.getElementById(
-                "edit-seller-category"
-            )?.value || "";
-
-
-        const message =
-            document.getElementById(
-                "edit-store-message"
-            );
-
-
-        if (
-            !name ||
-            !email ||
-            !storeName ||
-            !category
-        ) {
-
-            if (message) {
-
-                message.textContent =
-                    "Please enter all store details.";
-
-                message.className =
-                    "edit-store-message error";
+                editName.value =
+                    sellerData.name || "";
             }
 
-            return;
-        }
 
+            if (editEmail) {
 
-        seller.name = name;
-        seller.email = email;
-        seller.storeName = storeName;
-        seller.category = category;
-
-
-        seller.updatedAt =
-            new Date().toLocaleString("en-IN");
-
-
-        saveCurrentSeller(seller);
-
-
-        /* Update seller name in existing products */
-
-        const products = getProducts();
-
-
-        products.forEach(function (product) {
-
-            if (
-                String(product.sellerId) ===
-                String(seller.id)
-            ) {
-
-                product.sellerName =
-                    seller.storeName;
+                editEmail.value =
+                    sellerData.email || "";
             }
-        });
 
 
-        saveProducts(products);
+            if (editStoreName) {
+
+                editStoreName.value =
+                    sellerData.storeName || "";
+            }
 
 
-        loadSellerInformation();
-        displayProducts();
-        displaySellerOrders();
+            if (editCategory) {
+
+                editCategory.value =
+                    sellerData.category || "";
+            }
 
 
-        if (message) {
+            return sellerData;
 
-            message.textContent =
-                "Store information updated successfully.";
+        } catch (error) {
 
-            message.className =
-                "edit-store-message success";
-        }
-
-
-        setTimeout(function () {
-
-            closeEditStoreForm();
-
-        }, 1000);
-    }
-
-
-    /* =====================================================
-       RESET PRODUCT FORM
-    ===================================================== */
-
-    function resetProductForm() {
-
-        const form =
-            document.getElementById(
-                "product-form"
+            console.error(
+                "Error loading seller information:",
+                error
             );
 
-
-        const submitButton =
-            document.getElementById(
-                "product-submit-button"
-            );
-
-
-        const cancelButton =
-            document.getElementById(
-                "cancel-product-edit"
-            );
-
-
-        const title =
-            document.getElementById(
-                "product-form-title"
-            );
-
-
-        const description =
-            document.getElementById(
-                "product-form-description"
-            );
-
-
-        if (form) {
-
-            form.reset();
-
-            delete form.dataset.editingId;
-        }
-
-
-        if (submitButton) {
-
-            submitButton.textContent =
-                "Add Product";
-        }
-
-
-        if (cancelButton) {
-
-            cancelButton.hidden = true;
-        }
-
-
-        if (title) {
-
-            title.textContent =
-                "Add New Product";
-        }
-
-
-        if (description) {
-
-            description.textContent =
-                "Add a product to your ShopSphere store.";
+            return seller;
         }
     }
 
 
     /* =====================================================
-       STOCK
+       LOAD SELLER PRODUCTS
     ===================================================== */
 
-    function getStockStatus(stock) {
+    async function loadSellerProducts() {
 
-        const quantity =
-            Number(stock) || 0;
+        const seller =
+            getCurrentSeller();
 
 
-        if (quantity <= 0) {
-            return "Out of Stock";
+        if (!seller || !seller.id) {
+
+            return [];
         }
 
-
-        if (quantity <= 5) {
-            return "Low Stock";
-        }
-
-
-        return "In Stock";
-    }
-
-
-    function getStockClass(stock) {
-
-        const quantity =
-            Number(stock) || 0;
-
-
-        if (quantity <= 0) {
-            return "stock-out";
-        }
-
-
-        if (quantity <= 5) {
-            return "stock-low";
-        }
-
-
-        return "stock-in";
-    }
-
-
-    /* =====================================================
-       DISPLAY PRODUCTS
-    ===================================================== */
-
-    function displayProducts() {
 
         const productList =
             document.getElementById(
@@ -713,434 +387,420 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        const totalProducts =
-            document.getElementById(
-                "total-products"
+        try {
+
+            const products =
+                await apiRequest(
+                    `/products/seller/${seller.id}`
+                );
+
+
+            const sellerProducts =
+                Array.isArray(products)
+                    ? products
+                    : [];
+
+
+            /* =================================================
+               TOTAL PRODUCTS
+            ================================================= */
+
+            const totalProducts =
+                document.getElementById(
+                    "total-products"
+                );
+
+
+            if (totalProducts) {
+
+                totalProducts.textContent =
+                    sellerProducts.length;
+            }
+
+
+            /* =================================================
+               DISPLAY PRODUCTS
+            ================================================= */
+
+            if (!productList) {
+
+                return sellerProducts;
+            }
+
+
+            productList.innerHTML = "";
+
+
+            if (sellerProducts.length === 0) {
+
+                productList.innerHTML = `
+
+                    <div class="empty-products">
+
+                        <h3>
+                            No Products Yet
+                        </h3>
+
+                        <p>
+                            Add your first product to your store.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return sellerProducts;
+            }
+
+
+            sellerProducts.forEach(
+                function (product) {
+
+                    const productCard =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    productCard.className =
+                        "seller-product-card";
+
+
+                    const status =
+                        product.status ||
+                        "APPROVED";
+
+
+                    productCard.innerHTML = `
+
+                        <div class="seller-product-image">
+
+                            <img
+                                src="${product.imageUrl || "../images/placeholder.jpg"}"
+                                alt="${product.name || "Product"}"
+                                onerror="this.style.display='none'"
+                            >
+
+                        </div>
+
+
+                        <div class="seller-product-content">
+
+                            <h3>
+                                ${product.name || "Unnamed Product"}
+                            </h3>
+
+
+                            <p class="seller-product-category">
+                                ${product.category || "—"}
+                            </p>
+
+
+                            <p class="seller-product-description">
+                                ${product.description || ""}
+                            </p>
+
+
+                            <div class="seller-product-details">
+
+                                <strong>
+                                    ₹${Number(product.price || 0).toFixed(2)}
+                                </strong>
+
+                                <span>
+                                    Stock: ${product.stock ?? 0}
+                                </span>
+
+                            </div>
+
+
+                            <div class="seller-product-status">
+
+                                <span>
+                                    Status: ${status}
+                                </span>
+
+                            </div>
+
+
+                            <div class="seller-product-actions">
+
+                                <button
+                                    type="button"
+                                    class="edit-product-button"
+                                    data-product-id="${product.id}"
+                                >
+                                    Edit
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="delete-product-button"
+                                    data-product-id="${product.id}"
+                                >
+                                    Delete
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="stock-minus-button"
+                                    data-product-id="${product.id}"
+                                >
+                                    −
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="stock-plus-button"
+                                    data-product-id="${product.id}"
+                                >
+                                    +
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+
+                    productList.appendChild(
+                        productCard
+                    );
+
+                }
             );
 
 
-        if (!productList) {
-            return;
-        }
+            attachProductEvents(
+                sellerProducts
+            );
 
+
+            return sellerProducts;
+
+        } catch (error) {
+
+            console.error(
+                "Error loading seller products:",
+                error
+            );
+
+
+            if (productList) {
+
+                productList.innerHTML = `
+
+                    <div class="error-message">
+
+                        <h3>
+                            Unable to Load Products
+                        </h3>
+
+                        <p>
+                            Please refresh the page.
+                        </p>
+
+                    </div>
+
+                `;
+            }
+
+
+            return [];
+        }
+    }
+
+
+    /* =====================================================
+       ADD PRODUCT
+    ===================================================== */
+
+    async function addProduct(productData) {
 
         const seller =
             getCurrentSeller();
 
 
-        const allProducts =
-            getProducts();
+        if (!seller || !seller.id) {
 
-
-        if (!seller) {
-
-            productList.innerHTML = `
-
-                <div class="no-products">
-
-                    <h3>No seller found</h3>
-
-                    <p>
-                        Please register as a seller first.
-                    </p>
-
-                </div>
-
-            `;
-
-
-            if (totalProducts) {
-                totalProducts.textContent = "0";
-            }
+            alert(
+                "Please login again."
+            );
 
             return;
         }
 
 
-        const sellerProducts =
-            allProducts.filter(function (product) {
-
-                return (
-                    String(product.sellerId) ===
-                    String(seller.id)
-                );
-            });
+        productData.sellerId =
+            seller.id;
 
 
-        if (totalProducts) {
+        productData.status =
+            "PENDING";
 
-            totalProducts.textContent =
-                sellerProducts.length;
+
+        try {
+
+            await apiRequest(
+                "/products",
+                {
+                    method: "POST",
+
+                    body:
+                        JSON.stringify(
+                            productData
+                        )
+                }
+            );
+
+
+            alert(
+                "Product added successfully! Waiting for admin approval."
+            );
+
+
+            document
+                .getElementById(
+                    "product-form"
+                )
+                .reset();
+
+
+            document
+                .getElementById(
+                    "product-form-title"
+                )
+                .textContent =
+                    "Add New Product";
+
+
+            document
+                .getElementById(
+                    "product-submit-button"
+                )
+                .textContent =
+                    "Add Product";
+
+
+            document
+                .getElementById(
+                    "cancel-product-edit"
+                )
+                .hidden = true;
+
+
+            await loadSellerProducts();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error adding product:",
+                error
+            );
+
+
+            alert(
+                "Unable to add product."
+            );
         }
-
-
-        if (sellerProducts.length === 0) {
-
-            productList.innerHTML = `
-
-                <div class="no-products">
-
-                    <h3>
-                        No products yet
-                    </h3>
-
-                    <p>
-                        Add your first product
-                        using the form above.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        productList.innerHTML = "";
-
-
-        sellerProducts.forEach(function (product) {
-
-            const card =
-                document.createElement("article");
-
-
-            card.className =
-                "vendor-product-card";
-
-
-            const stock =
-                Number(product.stock) || 0;
-
-
-            const status =
-                product.status || "pending";
-
-
-            card.innerHTML = `
-
-                <img
-                    class="vendor-product-image"
-                    src="${escapeHtml(product.image)}"
-                    alt="${escapeHtml(product.name)}"
-                    onerror="this.style.display='none';"
-                >
-
-
-                <div class="vendor-product-content">
-
-                    <h3>
-                        ${escapeHtml(product.name)}
-                    </h3>
-
-
-                    <p class="vendor-product-price">
-                        ₹${formatPrice(product.price)}
-                    </p>
-
-
-                    <p>
-                        Category:
-                        ${escapeHtml(product.category)}
-                    </p>
-
-
-                    <div class="vendor-product-stock">
-
-                        <span
-                            class="stock-status ${getStockClass(stock)}"
-                        >
-                            ${getStockStatus(stock)}
-                        </span>
-
-
-                        <div class="stock-controls">
-
-                            <button
-                                type="button"
-                                class="stock-button"
-                                data-id="${escapeHtml(product.id)}"
-                                data-action="decrease"
-                            >
-                                −
-                            </button>
-
-
-                            <span class="stock-quantity">
-                                ${stock}
-                            </span>
-
-
-                            <button
-                                type="button"
-                                class="stock-button"
-                                data-id="${escapeHtml(product.id)}"
-                                data-action="increase"
-                            >
-                                +
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <p>
-                        ${escapeHtml(product.description)}
-                    </p>
-
-
-                    <p class="product-status">
-
-                        Status:
-
-                        <strong>
-                            ${escapeHtml(status)}
-                        </strong>
-
-                    </p>
-
-
-                    <div class="vendor-product-actions">
-
-                        <button
-                            type="button"
-                            class="edit-product"
-                            data-id="${escapeHtml(product.id)}"
-                        >
-                            Edit
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="delete-product"
-                            data-id="${escapeHtml(product.id)}"
-                        >
-                            Delete
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
-
-
-            productList.appendChild(card);
-        });
-
-
-        addEditEvents();
-        addDeleteEvents();
-        addStockEvents();
     }
 
 
     /* =====================================================
-       EDIT PRODUCT EVENTS
+       EDIT PRODUCT
     ===================================================== */
 
-    function addEditEvents() {
+    let editingProductId = null;
 
-        document
-            .querySelectorAll(".edit-product")
-            .forEach(function (button) {
 
-                button.addEventListener(
-                    "click",
-                    function () {
+    async function updateProduct(
+        productId,
+        productData
+    ) {
 
-                        const productId =
-                            String(button.dataset.id);
+        try {
 
+            const seller =
+                getCurrentSeller();
 
-                        const seller =
-                            getCurrentSeller();
 
+            productData.sellerId =
+                seller.id;
 
-                        if (!seller) {
 
-                            alert(
-                                "Seller information not found."
-                            );
+            await apiRequest(
+                `/products/${productId}`,
+                {
+                    method: "PUT",
 
-                            return;
-                        }
+                    body:
+                        JSON.stringify(
+                            productData
+                        )
+                }
+            );
 
 
-                        const products =
-                            getProducts();
+            alert(
+                "Product updated successfully."
+            );
 
 
-                        const product =
-                            products.find(
-                                function (item) {
+            editingProductId = null;
 
-                                    return (
-                                        String(item.id) ===
-                                        productId &&
 
-                                        String(item.sellerId) ===
-                                        String(seller.id)
-                                    );
-                                }
-                            );
-
-
-                        if (!product) {
-
-                            alert(
-                                "Product not found."
-                            );
-
-                            return;
-                        }
-
-
-                        const form =
-                            document.getElementById(
-                                "product-form"
-                            );
-
-
-                        if (!form) {
-                            return;
-                        }
-
-
-                        const nameInput =
-                            document.getElementById(
-                                "product-name"
-                            );
-
-
-                        const priceInput =
-                            document.getElementById(
-                                "product-price"
-                            );
-
-
-                        const categoryInput =
-                            document.getElementById(
-                                "product-category"
-                            );
-
-
-                        const stockInput =
-                            document.getElementById(
-                                "product-stock"
-                            );
-
-
-                        const imageInput =
-                            document.getElementById(
-                                "product-image"
-                            );
-
-
-                        const descriptionInput =
-                            document.getElementById(
-                                "product-description"
-                            );
-
-
-                        if (nameInput) {
-                            nameInput.value =
-                                product.name || "";
-                        }
-
-
-                        if (priceInput) {
-                            priceInput.value =
-                                product.price ?? "";
-                        }
-
-
-                        if (categoryInput) {
-                            categoryInput.value =
-                                product.category || "";
-                        }
-
-
-                        if (stockInput) {
-                            stockInput.value =
-                                product.stock ?? 0;
-                        }
-
-
-                        if (imageInput) {
-                            imageInput.value =
-                                product.image || "";
-                        }
-
-
-                        if (descriptionInput) {
-                            descriptionInput.value =
-                                product.description || "";
-                        }
-
-
-                        form.dataset.editingId =
-                            product.id;
-
-
-                        const submitButton =
-                            document.getElementById(
-                                "product-submit-button"
-                            );
-
-
-                        const cancelButton =
-                            document.getElementById(
-                                "cancel-product-edit"
-                            );
-
-
-                        const title =
-                            document.getElementById(
-                                "product-form-title"
-                            );
-
-
-                        const description =
-                            document.getElementById(
-                                "product-form-description"
-                            );
-
-
-                        if (submitButton) {
-                            submitButton.textContent =
-                                "Update Product";
-                        }
-
-
-                        if (cancelButton) {
-                            cancelButton.hidden = false;
-                        }
-
-
-                        if (title) {
-                            title.textContent =
-                                "Edit Product";
-                        }
-
-
-                        if (description) {
-                            description.textContent =
-                                "Update the details of your product.";
-                        }
-
-
-                        form.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center"
-                        });
-
-                    }
+            const form =
+                document.getElementById(
+                    "product-form"
                 );
 
-            });
+
+            form.reset();
+
+
+            document
+                .getElementById(
+                    "product-form-title"
+                )
+                .textContent =
+                    "Add New Product";
+
+
+            document
+                .getElementById(
+                    "product-submit-button"
+                )
+                .textContent =
+                    "Add Product";
+
+
+            document
+                .getElementById(
+                    "cancel-product-edit"
+                )
+                .hidden = true;
+
+
+            await loadSellerProducts();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error updating product:",
+                error
+            );
+
+
+            alert(
+                "Unable to update product."
+            );
+        }
     }
 
 
@@ -1148,103 +808,52 @@ document.addEventListener("DOMContentLoaded", function () {
        DELETE PRODUCT
     ===================================================== */
 
-    function addDeleteEvents() {
+    async function deleteProduct(
+        productId
+    ) {
 
-        document
-            .querySelectorAll(".delete-product")
-            .forEach(function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        const productId =
-                            String(button.dataset.id);
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this product?"
+            );
 
 
-                        if (
-                            !confirm(
-                                "Are you sure you want to delete this product?"
-                            )
-                        ) {
-                            return;
-                        }
+        if (!confirmed) {
+
+            return;
+        }
 
 
-                        const seller =
-                            getCurrentSeller();
+        try {
+
+            await apiRequest(
+                `/products/${productId}`,
+                {
+                    method: "DELETE"
+                }
+            );
 
 
-                        if (!seller) {
-
-                            alert(
-                                "Seller information not found."
-                            );
-
-                            return;
-                        }
+            alert(
+                "Product deleted successfully."
+            );
 
 
-                        let products =
-                            getProducts();
+            await loadSellerProducts();
 
 
-                        products =
-                            products.filter(
-                                function (product) {
+        } catch (error) {
 
-                                    return !(
-                                        String(product.id) ===
-                                        productId &&
-
-                                        String(product.sellerId) ===
-                                        String(seller.id)
-                                    );
-                                }
-                            );
+            console.error(
+                "Error deleting product:",
+                error
+            );
 
 
-                        saveProducts(products);
-
-
-                        resetProductForm();
-
-                        displayProducts();
-
-
-                        alert(
-                            "Product deleted successfully!"
-                        );
-                    }
-                );
-
-            });
-    }
-
-
-    /* =====================================================
-       STOCK EVENTS
-    ===================================================== */
-
-    function addStockEvents() {
-
-        document
-            .querySelectorAll(".stock-button")
-            .forEach(function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        updateProductStock(
-                            String(button.dataset.id),
-                            button.dataset.action
-                        );
-
-                    }
-                );
-
-            });
+            alert(
+                "Unable to delete product."
+            );
+        }
     }
 
 
@@ -1252,88 +861,287 @@ document.addEventListener("DOMContentLoaded", function () {
        UPDATE STOCK
     ===================================================== */
 
-    function updateProductStock(
+    async function updateStock(
         productId,
-        action
+        change
     ) {
 
-        const seller =
-            getCurrentSeller();
+        try {
+
+            const product =
+                await apiRequest(
+                    `/products/${productId}`
+                );
 
 
-        if (!seller) {
+            if (!product) {
 
-            alert(
-                "Seller information not found."
-            );
-
-            return;
-        }
+                return;
+            }
 
 
-        const products =
-            getProducts();
+            const currentStock =
+                Number(product.stock) || 0;
 
 
-        const index =
-            products.findIndex(
-                function (product) {
+            const newStock =
+                currentStock + change;
 
-                    return (
-                        String(product.id) ===
-                        String(productId) &&
 
-                        String(product.sellerId) ===
-                        String(seller.id)
-                    );
+            if (newStock < 0) {
+
+                alert(
+                    "Stock cannot be negative."
+                );
+
+                return;
+            }
+
+
+            product.stock =
+                newStock;
+
+
+            await apiRequest(
+                `/products/${productId}`,
+                {
+                    method: "PUT",
+
+                    body:
+                        JSON.stringify(
+                            product
+                        )
                 }
             );
 
 
-        if (index === -1) {
+            await loadSellerProducts();
 
-            alert(
-                "Product not found."
+
+        } catch (error) {
+
+            console.error(
+                "Error updating stock:",
+                error
             );
 
-            return;
+
+            alert(
+                "Unable to update stock."
+            );
         }
-
-
-        let stock =
-            Number(products[index].stock) || 0;
-
-
-        if (action === "increase") {
-            stock++;
-        }
-
-
-        if (
-            action === "decrease" &&
-            stock > 0
-        ) {
-            stock--;
-        }
-
-
-        products[index].stock =
-            stock;
-
-
-        products[index].updatedAt =
-            new Date().toLocaleString("en-IN");
-
-
-        saveProducts(products);
-
-
-        displayProducts();
     }
 
 
     /* =====================================================
-       PRODUCT FORM
+       PRODUCT EVENTS
+    ===================================================== */
+
+    function attachProductEvents(
+        products
+    ) {
+
+        document
+            .querySelectorAll(
+                ".edit-product-button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            const productId =
+                                Number(
+                                    button.dataset.productId
+                                );
+
+
+                            const product =
+                                products.find(
+                                    function (item) {
+
+                                        return Number(
+                                            item.id
+                                        ) === productId;
+
+                                    }
+                                );
+
+
+                            if (!product) {
+
+                                return;
+                            }
+
+
+                            editingProductId =
+                                product.id;
+
+
+                            document
+                                .getElementById(
+                                    "product-name"
+                                )
+                                .value =
+                                    product.name || "";
+
+
+                            document
+                                .getElementById(
+                                    "product-price"
+                                )
+                                .value =
+                                    product.price || "";
+
+
+                            document
+                                .getElementById(
+                                    "product-category"
+                                )
+                                .value =
+                                    product.category || "";
+
+
+                            document
+                                .getElementById(
+                                    "product-stock"
+                                )
+                                .value =
+                                    product.stock || 0;
+
+
+                            document
+                                .getElementById(
+                                    "product-image"
+                                )
+                                .value =
+                                    product.imageUrl || "";
+
+
+                            document
+                                .getElementById(
+                                    "product-description"
+                                )
+                                .value =
+                                    product.description || "";
+
+
+                            document
+                                .getElementById(
+                                    "product-form-title"
+                                )
+                                .textContent =
+                                    "Edit Product";
+
+
+                            document
+                                .getElementById(
+                                    "product-submit-button"
+                                )
+                                .textContent =
+                                    "Update Product";
+
+
+                            document
+                                .getElementById(
+                                    "cancel-product-edit"
+                                )
+                                .hidden = false;
+
+
+                            window.scrollTo(
+                                {
+                                    top: 0,
+                                    behavior: "smooth"
+                                }
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".delete-product-button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            deleteProduct(
+                                Number(
+                                    button.dataset.productId
+                                )
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".stock-minus-button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            updateStock(
+                                Number(
+                                    button.dataset.productId
+                                ),
+                                -1
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".stock-plus-button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            updateStock(
+                                Number(
+                                    button.dataset.productId
+                                ),
+                                1
+                            );
+
+                        }
+                    );
+
+                }
+            );
+    }
+
+
+    /* =====================================================
+       PRODUCT FORM SUBMIT
     ===================================================== */
 
     const productForm =
@@ -1346,218 +1154,97 @@ document.addEventListener("DOMContentLoaded", function () {
 
         productForm.addEventListener(
             "submit",
-            function (event) {
+            async function (event) {
 
                 event.preventDefault();
 
 
-                const seller =
-                    getCurrentSeller();
-
-
-                if (!seller) {
-
-                    alert(
-                        "Seller information not found. Please register again."
-                    );
-
-                    return;
-                }
-
-
-                const name =
-                    document.getElementById(
-                        "product-name"
-                    )?.value.trim() || "";
-
-
-                const price =
-                    Number(
-                        document.getElementById(
-                            "product-price"
-                        )?.value
-                    );
-
-
-                const category =
-                    document.getElementById(
-                        "product-category"
-                    )?.value || "";
-
-
-                const stock =
-                    Number(
-                        document.getElementById(
-                            "product-stock"
-                        )?.value
-                    );
-
-
-                const image =
-                    document.getElementById(
-                        "product-image"
-                    )?.value.trim() || "";
-
-
-                const description =
-                    document.getElementById(
-                        "product-description"
-                    )?.value.trim() || "";
-
-
-                if (
-                    !name ||
-                    !category ||
-                    !image ||
-                    !description ||
-                    !Number.isFinite(price) ||
-                    price <= 0 ||
-                    !Number.isFinite(stock) ||
-                    stock < 0
-                ) {
-
-                    alert(
-                        "Please enter valid product details."
-                    );
-
-                    return;
-                }
-
-
-                const products =
-                    getProducts();
-
-
-                const editingId =
-                    productForm.dataset.editingId;
-
-
-                /* =================================================
-                   UPDATE EXISTING PRODUCT
-                ================================================= */
-
-                if (editingId) {
-
-                    const index =
-                        products.findIndex(
-                            function (product) {
-
-                                return (
-                                    String(product.id) ===
-                                    String(editingId) &&
-
-                                    String(product.sellerId) ===
-                                    String(seller.id)
-                                );
-                            }
-                        );
-
-
-                    if (index === -1) {
-
-                        alert(
-                            "Unable to update product."
-                        );
-
-                        resetProductForm();
-
-                        return;
-                    }
-
-
-                    products[index].name =
-                        name;
-
-                    products[index].price =
-                        price;
-
-                    products[index].category =
-                        category;
-
-                    products[index].stock =
-                        stock;
-
-                    products[index].image =
-                        image;
-
-                    products[index].description =
-                        description;
-
-                    products[index].updatedAt =
-                        new Date().toLocaleString("en-IN");
-
-
-                    saveProducts(products);
-
-
-                    resetProductForm();
-
-                    displayProducts();
-
-
-                    alert(
-                        "Product updated successfully!"
-                    );
-
-
-                    return;
-                }
-
-
-                /* =================================================
-                   CREATE NEW PRODUCT
-                ================================================= */
-
-                const product = {
-
-                    id: Date.now(),
-
-                    sellerId:
-                        seller.id,
-
-                    sellerName:
-                        seller.storeName,
+                const productData = {
 
                     name:
-                        name,
+                        document
+                            .getElementById(
+                                "product-name"
+                            )
+                            .value
+                            .trim(),
 
                     price:
-                        price,
+                        Number(
+                            document
+                                .getElementById(
+                                    "product-price"
+                                )
+                                .value
+                        ),
 
                     category:
-                        category,
+                        document
+                            .getElementById(
+                                "product-category"
+                            )
+                            .value,
 
                     stock:
-                        stock,
+                        Number(
+                            document
+                                .getElementById(
+                                    "product-stock"
+                                )
+                                .value
+                        ),
 
-                    image:
-                        image,
+                    imageUrl:
+                        document
+                            .getElementById(
+                                "product-image"
+                            )
+                            .value
+                            .trim(),
 
                     description:
-                        description,
+                        document
+                            .getElementById(
+                                "product-description"
+                            )
+                            .value
+                            .trim()
 
-                    status:
-                        "pending",
-
-                    createdAt:
-                        new Date().toLocaleString("en-IN")
                 };
 
 
-                products.push(product);
+                if (
+                    !productData.name ||
+                    !productData.category ||
+                    !productData.imageUrl ||
+                    !productData.description ||
+                    productData.price <= 0 ||
+                    productData.stock < 0
+                ) {
+
+                    alert(
+                        "Please enter all product details correctly."
+                    );
+
+                    return;
+                }
 
 
-                saveProducts(products);
+                if (editingProductId) {
 
+                    await updateProduct(
+                        editingProductId,
+                        productData
+                    );
 
-                resetProductForm();
+                } else {
 
-                displayProducts();
+                    await addProduct(
+                        productData
+                    );
 
+                }
 
-                alert(
-                    "Product added successfully!"
-                );
             }
         );
     }
@@ -1579,7 +1266,34 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             function () {
 
-                resetProductForm();
+                editingProductId = null;
+
+
+                document
+                    .getElementById(
+                        "product-form"
+                    )
+                    .reset();
+
+
+                document
+                    .getElementById(
+                        "product-form-title"
+                    )
+                    .textContent =
+                        "Add New Product";
+
+
+                document
+                    .getElementById(
+                        "product-submit-button"
+                    )
+                    .textContent =
+                        "Add Product";
+
+
+                cancelProductEdit.hidden =
+                    true;
 
             }
         );
@@ -1587,1010 +1301,792 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       NORMALIZE ORDER ITEMS
+       EDIT STORE
     ===================================================== */
 
-    function getOrderItems(order) {
-
-        if (!order) {
-            return [];
-        }
-
-
-        if (Array.isArray(order.items)) {
-
-            return order.items.map(
-                function (item) {
-
-                    const quantity =
-                        Number(
-                            item.quantity ??
-                            item.qty ??
-                            1
-                        ) || 1;
+    const editStoreButton =
+        document.getElementById(
+            "edit-store-button"
+        );
 
 
-                    const price =
-                        Number(
-                            item.price ?? 0
-                        ) || 0;
+    const editStoreContainer =
+        document.getElementById(
+            "edit-store-form-container"
+        );
 
 
-                    let totalAmount =
-                        Number(
-                            item.totalAmount
+    const cancelEditStore =
+        document.getElementById(
+            "cancel-edit-store"
+        );
+
+
+    if (editStoreButton) {
+
+        editStoreButton.addEventListener(
+            "click",
+            function () {
+
+                if (editStoreContainer) {
+
+                    editStoreContainer.hidden =
+                        false;
+
+                }
+
+            }
+        );
+    }
+
+
+    if (cancelEditStore) {
+
+        cancelEditStore.addEventListener(
+            "click",
+            function () {
+
+                if (editStoreContainer) {
+
+                    editStoreContainer.hidden =
+                        true;
+
+                }
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       UPDATE STORE
+    ===================================================== */
+
+    const editStoreForm =
+        document.getElementById(
+            "edit-store-form"
+        );
+
+
+    if (editStoreForm) {
+
+        editStoreForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const seller =
+                    getCurrentSeller();
+
+
+                if (!seller || !seller.id) {
+
+                    return;
+                }
+
+
+                const sellerData = {
+
+                    name:
+                        document
+                            .getElementById(
+                                "edit-seller-name"
+                            )
+                            .value
+                            .trim(),
+
+                    email:
+                        document
+                            .getElementById(
+                                "edit-seller-email"
+                            )
+                            .value
+                            .trim()
+                            .toLowerCase(),
+
+                    storeName:
+                        document
+                            .getElementById(
+                                "edit-store-name"
+                            )
+                            .value
+                            .trim(),
+
+                    category:
+                        document
+                            .getElementById(
+                                "edit-seller-category"
+                            )
+                            .value
+
+                };
+
+
+                const message =
+                    document.getElementById(
+                        "edit-store-message"
+                    );
+
+
+                try {
+
+                    const updatedSeller =
+                        await apiRequest(
+                            `/sellers/${seller.id}`,
+                            {
+                                method: "PUT",
+
+                                body:
+                                    JSON.stringify(
+                                        sellerData
+                                    )
+                            }
                         );
 
 
-                    if (
-                        !Number.isFinite(
-                            totalAmount
-                        )
-                    ) {
+                    const newSeller =
+                        {
+                            ...seller,
+                            ...updatedSeller
+                        };
 
-                        totalAmount =
-                            price * quantity;
+
+                    localStorage.setItem(
+                        SELLER_KEY,
+                        JSON.stringify(
+                            newSeller
+                        )
+                    );
+
+
+                    if (message) {
+
+                        message.textContent =
+                            "Store updated successfully.";
+
+                        message.className =
+                            "edit-store-message success";
                     }
 
 
-                    return {
+                    await loadSellerInformation();
 
-                        productId:
-                            item.productId ??
-                            item.id ??
-                            null,
 
-                        productName:
-                            item.productName ??
-                            item.name ??
-                            "Product",
+                    setTimeout(
+                        function () {
 
-                        sellerId:
-                            item.sellerId ??
-                            order.sellerId ??
-                            null,
+                            if (
+                                editStoreContainer
+                            ) {
 
-                        quantity:
-                            quantity,
+                                editStoreContainer.hidden =
+                                    true;
 
-                        price:
-                            price,
+                            }
 
-                        totalAmount:
-                            totalAmount
-                    };
+                        },
+                        1000
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error updating store:",
+                        error
+                    );
+
+
+                    if (message) {
+
+                        message.textContent =
+                            "Unable to update store.";
+
+                        message.className =
+                            "edit-store-message error";
+                    }
+
                 }
-            );
-        }
 
-
-        /* Single-product order */
-
-        const quantity =
-            Number(
-                order.quantity || 1
-            ) || 1;
-
-
-        const price =
-            Number(
-                order.price || 0
-            ) || 0;
-
-
-        let totalAmount =
-            Number(
-                order.totalAmount
-            );
-
-
-        if (!Number.isFinite(totalAmount)) {
-
-            totalAmount =
-                price * quantity;
-        }
-
-
-        return [{
-
-            productId:
-                order.productId ??
-                order.productID ??
-                null,
-
-            productName:
-                order.productName ??
-                "Product",
-
-            sellerId:
-                order.sellerId ??
-                null,
-
-            quantity:
-                quantity,
-
-            price:
-                price,
-
-            totalAmount:
-                totalAmount
-        }];
-    }
-
-
-    /* =====================================================
-       GET SELLER ORDER ITEMS
-    ===================================================== */
-
-    function getSellerOrderItems(
-        order,
-        sellerId
-    ) {
-
-        const items =
-            getOrderItems(order);
-
-
-        return items.filter(
-            function (item) {
-
-                return (
-                    String(item.sellerId) ===
-                    String(sellerId)
-                );
             }
         );
     }
 
 
     /* =====================================================
-       GET ORDER STATUS
+       SELLER ORDERS
     ===================================================== */
 
-    function getOrderStatus(order) {
+    async function displaySellerOrders() {
 
-        if (!order || !order.status) {
-            return "Pending";
-        }
-
-
-        return String(order.status)
-            .toLowerCase()
-            .replace(/^\w/, function (letter) {
-                return letter.toUpperCase();
-            });
-    }
-
-
-    /* =====================================================
-       DISPLAY SELLER ORDERS
-    ===================================================== */
-
-    function displaySellerOrders() {
-
-        const ordersList =
+        const ordersContainer =
             document.getElementById(
                 "seller-orders-list"
             );
 
 
-        if (!ordersList) {
-            return;
-        }
-
-
-        const totalOrders =
-            document.getElementById(
-                "total-orders"
-            );
-
-
-        const totalSales =
-            document.getElementById(
-                "total-sales"
-            );
-
-
-        const totalCommission =
-            document.getElementById(
-                "total-commission"
-            );
-
-
-        const sellerEarnings =
-            document.getElementById(
-                "seller-earnings"
-            );
-
-
-        const seller =
-            getCurrentSeller();
-
-
-        /* =================================================
-           ALWAYS RESET FINANCIAL VALUES FIRST
-           This guarantees ₹0 when there are no orders.
-        ================================================= */
-
-        if (totalOrders) {
-            totalOrders.textContent = "0";
-        }
-
-
-        if (totalSales) {
-            totalSales.textContent = "₹0";
-        }
-
-
-        if (totalCommission) {
-            totalCommission.textContent = "₹0";
-        }
-
-
-        if (sellerEarnings) {
-            sellerEarnings.textContent = "₹0";
-        }
-
-
-        displayBestSellingProduct([]);
-
-
-        /* =================================================
-           NO SELLER
-        ================================================= */
-
-        if (!seller) {
-
-            ordersList.innerHTML = `
-
-                <div class="no-orders">
-
-                    <h3>
-                        Seller information not found
-                    </h3>
-
-                    <p>
-                        Please register as a seller first.
-                    </p>
-
-                </div>
-            `;
+        if (!ordersContainer) {
 
             return;
         }
 
 
-        const allOrders =
-            getOrders();
+        try {
+
+            const seller =
+                getCurrentSeller();
 
 
-        const sellerOrders = [];
+            if (!seller || !seller.id) {
 
+                ordersContainer.innerHTML =
+                    "<p>Please login again.</p>";
 
-        allOrders.forEach(
-            function (order) {
-
-                const sellerItems =
-                    getSellerOrderItems(
-                        order,
-                        seller.id
-                    );
-
-
-                if (sellerItems.length > 0) {
-
-                    sellerOrders.push({
-
-                        order: order,
-
-                        items: sellerItems
-                    });
-                }
-            }
-        );
-
-
-        /* =================================================
-           NO SELLER ORDERS
-        ================================================= */
-
-        if (sellerOrders.length === 0) {
-
-            if (totalOrders) {
-                totalOrders.textContent = "0";
+                return;
             }
 
 
-            if (totalSales) {
-                totalSales.textContent = "₹0";
+            const sellerId =
+                seller.id;
+
+
+            const response =
+                await apiRequest(
+                    `/orders/seller/${sellerId}`
+                );
+
+
+            const sellerOrderItems =
+                Array.isArray(response)
+                    ? response
+                    : [];
+
+
+            /* =================================================
+               NO ORDERS
+            ================================================= */
+
+            if (
+                sellerOrderItems.length === 0
+            ) {
+
+                ordersContainer.innerHTML = `
+
+                    <div class="empty-orders">
+
+                        <h3>
+                            No Orders Yet
+                        </h3>
+
+                        <p>
+                            Orders containing your products will appear here.
+                        </p>
+
+                    </div>
+
+                `;
+
+
+                updateOrderSummary(
+                    0,
+                    0
+                );
+
+
+                return;
             }
 
 
-            if (totalCommission) {
-                totalCommission.textContent = "₹0";
-            }
+            /* =================================================
+               GROUP ITEMS BY ORDER
+            ================================================= */
+
+            const groupedOrders = {};
 
 
-            if (sellerEarnings) {
-                sellerEarnings.textContent = "₹0";
-            }
+            sellerOrderItems.forEach(
+                function (item) {
+
+                    const orderId =
+                        item.orderId;
 
 
-            displayBestSellingProduct([]);
+                    if (!orderId) {
 
-
-            ordersList.innerHTML = `
-
-                <div class="no-orders">
-
-                    <h3>
-                        No orders yet
-                    </h3>
-
-                    <p>
-                        Orders for your products will
-                        appear here.
-                    </p>
-
-                </div>
-            `;
-
-            return;
-        }
-
-
-        /* =================================================
-           TOTAL ORDER COUNT
-        ================================================= */
-
-        if (totalOrders) {
-
-            totalOrders.textContent =
-                sellerOrders.length;
-        }
-
-
-        /* =================================================
-           TOTAL SALES
-        ================================================= */
-
-        let totalSalesAmount = 0;
-
-
-        sellerOrders.forEach(
-            function (sellerOrder) {
-
-                const status =
-                    getOrderStatus(
-                        sellerOrder.order
-                    );
-
-
-                if (status === "Cancelled") {
-                    return;
-                }
-
-
-                sellerOrder.items.forEach(
-                    function (item) {
-
-                        totalSalesAmount +=
-                            Number(
-                                item.totalAmount
-                            ) || 0;
+                        return;
                     }
-                );
-            }
-        );
 
 
-        /* =================================================
-           COMMISSION
-        ================================================= */
+                    if (
+                        !groupedOrders[orderId]
+                    ) {
 
-        const commissionAmount =
-            calculateCommission(
-                totalSalesAmount
+                        groupedOrders[orderId] = {
+
+                            orderId:
+                                orderId,
+
+                            customerId:
+                                item.customerId,
+
+                            status:
+                                item.status ||
+                                "PLACED",
+
+                            items: []
+
+                        };
+
+                    }
+
+
+                    groupedOrders[
+                        orderId
+                    ].items.push({
+
+                        productId:
+                            item.productId,
+
+                        productName:
+                            item.productName ||
+                            "Product",
+
+                        quantity:
+                            Number(
+                                item.quantity
+                            ) || 0,
+
+                        price:
+                            Number(
+                                item.price
+                            ) || 0
+
+                    });
+
+                }
             );
 
 
-        /* =================================================
-           SELLER EARNINGS
-        ================================================= */
-
-        const earningsAmount =
-            calculateSellerEarnings(
-                totalSalesAmount
-            );
-
-
-        if (totalSales) {
-
-            totalSales.textContent =
-                "₹" +
-                formatPrice(
-                    totalSalesAmount
+            const orders =
+                Object.values(
+                    groupedOrders
                 );
-        }
 
 
-        if (totalCommission) {
+            /* =================================================
+               CALCULATE SALES
+            ================================================= */
 
-            totalCommission.textContent =
-                "₹" +
-                formatPrice(
-                    commissionAmount
-                );
-        }
+            let totalSales = 0;
 
 
-        if (sellerEarnings) {
+            orders.forEach(
+                function (order) {
 
-            sellerEarnings.textContent =
-                "₹" +
-                formatPrice(
-                    earningsAmount
-                );
-        }
+                    order.items.forEach(
+                        function (item) {
 
+                            totalSales +=
+                                Number(
+                                    item.price
+                                ) *
+                                Number(
+                                    item.quantity
+                                );
 
-        /* =================================================
-           BEST SELLING PRODUCT
-        ================================================= */
-
-        displayBestSellingProduct(
-            sellerOrders
-        );
-
-
-        /* =================================================
-           DISPLAY ORDERS
-        ================================================= */
-
-        ordersList.innerHTML = "";
-
-
-        sellerOrders.forEach(
-            function (sellerOrder) {
-
-                const order =
-                    sellerOrder.order;
-
-
-                const orderCard =
-                    document.createElement(
-                        "article"
+                        }
                     );
 
+                }
+            );
 
-                orderCard.className =
-                    "seller-order-card";
+
+            const commission =
+                totalSales *
+                COMMISSION_RATE;
 
 
-                const productHtml =
-                    sellerOrder.items
-                        .map(
-                            function (item) {
+            const earnings =
+                totalSales -
+                commission;
 
-                                return `
 
-                                    <div class="seller-order-product">
+            updateOrderSummary(
+                totalSales,
+                commission,
+                earnings
+            );
+
+
+            /* =================================================
+               DISPLAY ORDERS
+            ================================================= */
+
+            ordersContainer.innerHTML =
+                "";
+
+
+            orders.forEach(
+                function (order) {
+
+                    const status =
+                        getOrderStatus(
+                            order
+                        );
+
+
+                    const statusDisplay =
+                        status.charAt(0) +
+                        status.slice(1)
+                            .toLowerCase();
+
+
+                    let orderTotal = 0;
+
+                    let itemsHTML = "";
+
+
+                    order.items.forEach(
+                        function (item) {
+
+                            const itemTotal =
+                                Number(
+                                    item.price
+                                ) *
+                                Number(
+                                    item.quantity
+                                );
+
+
+                            orderTotal +=
+                                itemTotal;
+
+
+                            itemsHTML += `
+
+                                <div class="order-item">
+
+                                    <div class="order-item-details">
 
                                         <strong>
-                                            ${escapeHtml(
-                                                item.productName
-                                            )}
+                                            ${item.productName}
                                         </strong>
 
                                         <span>
-                                            Qty:
-                                            ${item.quantity}
-                                        </span>
-
-                                        <span>
-                                            ₹${formatPrice(
-                                                item.totalAmount
-                                            )}
+                                            Quantity: ${item.quantity}
                                         </span>
 
                                     </div>
 
-                                `;
-                            }
-                        )
-                        .join("");
 
+                                    <div class="order-item-price">
 
-                const sellerOrderTotal =
-                    sellerOrder.items.reduce(
-                        function (
-                            total,
-                            item
-                        ) {
+                                        ₹${itemTotal.toFixed(2)}
 
-                            return (
-                                total +
-                                (
-                                    Number(
-                                        item.totalAmount
-                                    ) || 0
-                                )
-                            );
+                                    </div>
 
-                        },
-                        0
+                                </div>
+
+                            `;
+
+                        }
                     );
 
 
-                const orderCommission =
-                    calculateCommission(
-                        sellerOrderTotal
-                    );
+                    const orderCard =
+                        document.createElement(
+                            "div"
+                        );
 
 
-                const orderSellerEarnings =
-                    calculateSellerEarnings(
-                        sellerOrderTotal
-                    );
+                    orderCard.className =
+                        "seller-order-card";
 
 
-                const status =
-                    getOrderStatus(order);
+                    orderCard.innerHTML = `
 
-
-                orderCard.innerHTML = `
-
-                    <div class="seller-order-header">
-
-                        <div>
-
-                            <h3 class="seller-order-id">
-
-                                Order #
-                                ${escapeHtml(order.id)}
-
-                            </h3>
-
-
-                            <p class="seller-order-date">
-
-                                ${escapeHtml(
-                                    order.createdAt || "—"
-                                )}
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="seller-order-details">
-
-
-                        <div class="seller-order-detail">
-
-                            <span>
-                                Customer
-                            </span>
-
-                            <strong>
-
-                                ${escapeHtml(
-                                    order.customerName ||
-                                    order.customer?.name ||
-                                    "Customer"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-
-                        <div class="seller-order-detail">
-
-                            <span>
-                                Products
-                            </span>
+                        <div class="order-card-header">
 
                             <div>
-                                ${productHtml}
+
+                                <h3>
+                                    Order #${order.orderId}
+                                </h3>
+
+                                <p>
+                                    Customer #${order.customerId}
+                                </p>
+
+                            </div>
+
+
+                            <div class="order-status-section">
+
+                                <label
+                                    for="status-${order.orderId}"
+                                >
+                                    Status
+                                </label>
+
+
+                                <select
+                                    id="status-${order.orderId}"
+                                    class="order-status-select"
+                                    data-order-id="${order.orderId}"
+                                >
+
+                                    <option
+                                        value="PLACED"
+                                        ${status === "PLACED" ? "selected" : ""}
+                                    >
+                                        Placed
+                                    </option>
+
+
+                                    <option
+                                        value="CONFIRMED"
+                                        ${status === "CONFIRMED" ? "selected" : ""}
+                                    >
+                                        Confirmed
+                                    </option>
+
+
+                                    <option
+                                        value="SHIPPED"
+                                        ${status === "SHIPPED" ? "selected" : ""}
+                                    >
+                                        Shipped
+                                    </option>
+
+
+                                    <option
+                                        value="DELIVERED"
+                                        ${status === "DELIVERED" ? "selected" : ""}
+                                    >
+                                        Delivered
+                                    </option>
+
+
+                                    <option
+                                        value="CANCELLED"
+                                        ${status === "CANCELLED" ? "selected" : ""}
+                                    >
+                                        Cancelled
+                                    </option>
+
+                                </select>
+
                             </div>
 
                         </div>
 
 
-                        <div class="seller-order-detail">
+                        <div class="order-card-body">
 
-                            <span>
-                                Gross Sales
-                            </span>
 
-                            <strong>
+                            <div class="order-info">
 
-                                ₹${formatPrice(
-                                    sellerOrderTotal
-                                )}
+                                <div>
 
-                            </strong>
+                                    <span class="label">
+                                        Order ID
+                                    </span>
+
+                                    <span class="value">
+                                        #${order.orderId}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="label">
+                                        Customer ID
+                                    </span>
+
+                                    <span class="value">
+                                        #${order.customerId}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="label">
+                                        Status
+                                    </span>
+
+                                    <span class="value">
+                                        ${statusDisplay}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="order-items">
+
+                                <h4>
+                                    Products
+                                </h4>
+
+                                ${itemsHTML}
+
+                            </div>
+
+
+                            <div class="order-card-footer">
+
+
+                                <div>
+
+                                    <span>
+                                        Seller Sales
+                                    </span>
+
+                                    <strong>
+                                        ₹${orderTotal.toFixed(2)}
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Commission (10%)
+                                    </span>
+
+                                    <strong>
+                                        ₹${(
+                                            orderTotal *
+                                            COMMISSION_RATE
+                                        ).toFixed(2)}
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Your Earnings
+                                    </span>
+
+                                    <strong>
+                                        ₹${(
+                                            orderTotal -
+                                            (
+                                                orderTotal *
+                                                COMMISSION_RATE
+                                            )
+                                        ).toFixed(2)}
+                                    </strong>
+
+                                </div>
+
+
+                            </div>
+
 
                         </div>
 
-
-                        <div class="seller-order-detail">
-
-                            <span>
-                                ShopSphere Commission
-                            </span>
-
-                            <strong>
-
-                                ₹${formatPrice(
-                                    orderCommission
-                                )}
-
-                                <small>
-                                    (10%)
-                                </small>
-
-                            </strong>
-
-                        </div>
+                    `;
 
 
-                        <div class="seller-order-detail">
+                    ordersContainer.appendChild(
+                        orderCard
+                    );
 
-                            <span>
-                                Seller Earnings
-                            </span>
-
-                            <strong>
-
-                                ₹${formatPrice(
-                                    orderSellerEarnings
-                                )}
-
-                            </strong>
-
-                        </div>
+                }
+            );
 
 
-                    </div>
+            addOrderStatusEvents();
 
 
-                    <div class="seller-order-status">
+        } catch (error) {
 
-                        <span class="order-status-label">
-                            Order Status
-                        </span>
-
-
-                        <select
-                            class="order-status-select"
-                            data-order-id="${escapeHtml(order.id)}"
-                        >
-
-                            <option
-                                value="Pending"
-                                ${status === "Pending" ? "selected" : ""}
-                            >
-                                Pending
-                            </option>
+            console.error(
+                "Error loading seller orders:",
+                error
+            );
 
 
-                            <option
-                                value="Confirmed"
-                                ${status === "Confirmed" ? "selected" : ""}
-                            >
-                                Confirmed
-                            </option>
+            ordersContainer.innerHTML = `
 
+                <div class="error-message">
 
-                            <option
-                                value="Shipped"
-                                ${status === "Shipped" ? "selected" : ""}
-                            >
-                                Shipped
-                            </option>
+                    <h3>
+                        Unable to Load Orders
+                    </h3>
 
+                    <p>
+                        Please refresh the page and try again.
+                    </p>
 
-                            <option
-                                value="Delivered"
-                                ${status === "Delivered" ? "selected" : ""}
-                            >
-                                Delivered
-                            </option>
+                </div>
 
+            `;
 
-                            <option
-                                value="Cancelled"
-                                ${status === "Cancelled" ? "selected" : ""}
-                            >
-                                Cancelled
-                            </option>
+        }
 
-                        </select>
-
-                    </div>
-                `;
-
-
-                ordersList.appendChild(orderCard);
-            }
-        );
-
-
-        addOrderStatusEvents();
     }
 
 
     /* =====================================================
-       BEST SELLING PRODUCT
+       ORDER SUMMARY
     ===================================================== */
 
-    function displayBestSellingProduct(
-        sellerOrders
+    function updateOrderSummary(
+        totalSales,
+        commission,
+        earnings
     ) {
 
-        let bestSellingElement =
+        const totalSalesElement =
             document.getElementById(
-                "best-selling-product"
+                "total-sales"
             );
 
 
-        /* Create card only if it does not already exist */
+        if (totalSalesElement) {
 
-        if (!bestSellingElement) {
-
-            const totalSalesElement =
-                document.getElementById(
-                    "total-sales"
-                );
-
-
-            if (
-                totalSalesElement &&
-                totalSalesElement.parentElement
-            ) {
-
-                bestSellingElement =
-                    document.createElement("div");
-
-
-                bestSellingElement.id =
-                    "best-selling-product";
-
-
-                bestSellingElement.className =
-                    "dashboard-stat-card best-selling-card";
-
-
-                totalSalesElement.parentElement
-                    .insertAdjacentElement(
-                        "afterend",
-                        bestSellingElement
-                    );
-            }
+            totalSalesElement.textContent =
+                `₹${Number(totalSales).toFixed(2)}`;
         }
 
 
-        if (!bestSellingElement) {
-            return;
+        const commissionElement =
+            document.getElementById(
+                "total-commission"
+            );
+
+
+        if (commissionElement) {
+
+            commissionElement.textContent =
+                `₹${Number(commission).toFixed(2)}`;
         }
 
 
-        /* =================================================
-           NO SALES
-        ================================================= */
+        const earningsElement =
+            document.getElementById(
+                "seller-earnings"
+            );
 
-        if (
-            !Array.isArray(sellerOrders) ||
-            sellerOrders.length === 0
-        ) {
 
-            bestSellingElement.innerHTML = `
+        if (earningsElement) {
 
-                <div class="best-selling-content">
-
-                    <span class="best-selling-icon">
-                        🏆
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            Best-Selling Product
-                        </h3>
-
-                        <p>
-                            No sales yet
-                        </p>
-
-                    </div>
-
-                </div>
-
-            `;
-
-            return;
+            earningsElement.textContent =
+                `₹${Number(earnings).toFixed(2)}`;
         }
 
-
-        const productSales = {};
-
-
-        sellerOrders.forEach(
-            function (sellerOrder) {
-
-                const status =
-                    getOrderStatus(
-                        sellerOrder.order
-                    );
-
-
-                if (status === "Cancelled") {
-                    return;
-                }
-
-
-                sellerOrder.items.forEach(
-                    function (item) {
-
-                        const productId =
-                            item.productId ??
-                            item.productName;
-
-
-                        if (
-                            !productSales[productId]
-                        ) {
-
-                            productSales[productId] = {
-
-                                name:
-                                    item.productName ||
-                                    "Product",
-
-                                quantity:
-                                    0,
-
-                                sales:
-                                    0
-                            };
-                        }
-
-
-                        productSales[productId].quantity +=
-                            Number(
-                                item.quantity
-                            ) || 0;
-
-
-                        productSales[productId].sales +=
-                            Number(
-                                item.totalAmount
-                            ) || 0;
-                    }
-                );
-            }
-        );
-
-
-        const products =
-            Object.values(productSales);
-
-
-        if (products.length === 0) {
-
-            bestSellingElement.innerHTML = `
-
-                <div class="best-selling-content">
-
-                    <span class="best-selling-icon">
-                        🏆
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            Best-Selling Product
-                        </h3>
-
-                        <p>
-                            No sales yet
-                        </p>
-
-                    </div>
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        products.sort(
-            function (a, b) {
-
-                if (
-                    b.quantity !==
-                    a.quantity
-                ) {
-
-                    return (
-                        b.quantity -
-                        a.quantity
-                    );
-                }
-
-
-                return (
-                    b.sales -
-                    a.sales
-                );
-            }
-        );
-
-
-        const bestProduct =
-            products[0];
-
-
-        bestSellingElement.innerHTML = `
-
-            <div class="best-selling-content">
-
-                <span class="best-selling-icon">
-                    🏆
-                </span>
-
-
-                <div class="best-selling-info">
-
-                    <h3>
-                        Best-Selling Product
-                    </h3>
-
-
-                    <strong class="best-selling-name">
-
-                        ${escapeHtml(
-                            bestProduct.name
-                        )}
-
-                    </strong>
-
-
-                    <p class="best-selling-quantity">
-
-                        ${bestProduct.quantity}
-
-                        ${
-                            bestProduct.quantity === 1
-                                ? "unit"
-                                : "units"
-                        }
-
-                        sold
-
-                    </p>
-
-
-                    <p class="best-selling-sales">
-
-                        Sales:
-                        ₹${formatPrice(
-                            bestProduct.sales
-                        )}
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        `;
     }
 
 
@@ -2609,11 +2105,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     select.addEventListener(
                         "change",
-                        function () {
+                        async function () {
 
-                            updateOrderStatus(
-                                select.dataset.orderId,
-                                select.value
+                            const orderId =
+                                Number(
+                                    select.dataset.orderId
+                                );
+
+
+                            const newStatus =
+                                select.value;
+
+
+                            await updateOrderStatus(
+                                orderId,
+                                newStatus
                             );
 
                         }
@@ -2621,6 +2127,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 }
             );
+
     }
 
 
@@ -2628,7 +2135,7 @@ document.addEventListener("DOMContentLoaded", function () {
        UPDATE ORDER STATUS
     ===================================================== */
 
-    function updateOrderStatus(
+    async function updateOrderStatus(
         orderId,
         newStatus
     ) {
@@ -2637,132 +2144,183 @@ document.addEventListener("DOMContentLoaded", function () {
             getCurrentSeller();
 
 
-        if (!seller) {
-
-            alert(
-                "Seller information not found."
-            );
+        if (!seller || !seller.id) {
 
             return;
         }
 
 
-        const orders =
-            getOrders();
+        try {
 
-
-        const index =
-            orders.findIndex(
-                function (order) {
-
-                    return (
-                        String(order.id) ===
-                        String(orderId) &&
-
-                        (
-                            String(order.sellerId) ===
-                            String(seller.id) ||
-
-                            getSellerOrderItems(
-                                order,
-                                seller.id
-                            ).length > 0
-                        )
-                    );
+            await apiRequest(
+                `/orders/${orderId}/status?sellerId=${seller.id}&status=${newStatus}`,
+                {
+                    method: "PUT"
                 }
             );
 
 
-        if (index === -1) {
+            alert(
+                "Order status updated successfully."
+            );
+
+
+            await displaySellerOrders();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error updating order status:",
+                error
+            );
+
 
             alert(
-                "Order not found."
+                "Unable to update order status."
             );
+
+
+            await displaySellerOrders();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       TOTAL ORDERS
+    ===================================================== */
+
+    async function loadTotalOrders() {
+
+        const seller =
+            getCurrentSeller();
+
+
+        if (!seller || !seller.id) {
 
             return;
         }
 
 
-        orders[index].status =
-            newStatus;
+        try {
+
+            const response =
+                await apiRequest(
+                    `/orders/seller/${seller.id}`
+                );
 
 
-        orders[index].updatedAt =
-            new Date().toLocaleString("en-IN");
+            const orderItems =
+                Array.isArray(response)
+                    ? response
+                    : [];
 
 
-        saveOrders(orders);
+            const uniqueOrderIds =
+                new Set();
 
 
-        displaySellerOrders();
+            orderItems.forEach(
+                function (item) {
+
+                    if (item.orderId) {
+
+                        uniqueOrderIds.add(
+                            item.orderId
+                        );
+
+                    }
+
+                }
+            );
+
+
+            const totalOrders =
+                document.getElementById(
+                    "total-orders"
+                );
+
+
+            if (totalOrders) {
+
+                totalOrders.textContent =
+                    uniqueOrderIds.size;
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading total orders:",
+                error
+            );
+
+        }
+
     }
 
 
     /* =====================================================
-       EDIT STORE BUTTON
+       INITIAL DASHBOARD LOAD
     ===================================================== */
 
-    const editStoreButton =
-        document.getElementById(
-            "edit-store-button"
+    async function initializeDashboard() {
+
+        console.log(
+            "ShopSphere Seller Dashboard loading..."
         );
 
 
-    if (editStoreButton) {
+        const seller =
+            getCurrentSeller();
 
-        editStoreButton.addEventListener(
-            "click",
-            openEditStoreForm
+
+        if (!seller || !seller.id) {
+
+            console.error(
+                "Seller session not found."
+            );
+
+
+            window.location.href =
+                "seller-login.html";
+
+            return;
+        }
+
+
+        console.log(
+            "Logged in seller:",
+            seller
         );
+
+
+        /*
+         * Load everything independently.
+         */
+
+        await loadSellerInformation();
+
+        await loadSellerProducts();
+
+        await displaySellerOrders();
+
+        await loadTotalOrders();
+
+
+        console.log(
+            "Seller dashboard loaded successfully."
+        );
+
     }
 
 
     /* =====================================================
-       EDIT STORE FORM
+       START DASHBOARD
     ===================================================== */
 
-    const editStoreForm =
-        document.getElementById(
-            "edit-store-form"
-        );
-
-
-    if (editStoreForm) {
-
-        editStoreForm.addEventListener(
-            "submit",
-            updateStoreInformation
-        );
-    }
-
-
-    /* =====================================================
-       CANCEL STORE EDIT
-    ===================================================== */
-
-    const cancelEditStore =
-        document.getElementById(
-            "cancel-edit-store"
-        );
-
-
-    if (cancelEditStore) {
-
-        cancelEditStore.addEventListener(
-            "click",
-            closeEditStoreForm
-        );
-    }
-
-
-    /* =====================================================
-       INITIALIZE
-    ===================================================== */
-
-    loadSellerInformation();
-
-    displayProducts();
-
-    displaySellerOrders();
+    initializeDashboard();
 
 });

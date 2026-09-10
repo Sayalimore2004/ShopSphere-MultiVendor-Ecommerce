@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const sellerMessage =
         document.getElementById("seller-message");
 
-
     /* =====================================================
        SHOW MESSAGE
     ===================================================== */
@@ -18,11 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         sellerMessage.textContent = message;
-
         sellerMessage.className =
             "seller-message " + type;
     }
-
 
     /* =====================================================
        CHECK FORM
@@ -37,17 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-
     /* =====================================================
        FORM SUBMISSION
     ===================================================== */
 
     sellerForm.addEventListener(
         "submit",
-        function (event) {
+        async function (event) {
 
             event.preventDefault();
-
 
             /* =================================================
                GET FORM VALUES
@@ -59,7 +54,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     .value
                     .trim();
 
-
             const email =
                 document
                     .getElementById("seller-email")
@@ -67,13 +61,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     .trim()
                     .toLowerCase();
 
-
             const password =
                 document
                     .getElementById("seller-password")
                     .value
                     .trim();
-
 
             const storeName =
                 document
@@ -81,12 +73,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     .value
                     .trim();
 
-
             const category =
                 document
                     .getElementById("seller-category")
                     .value;
-
 
             /* =================================================
                VALIDATION
@@ -108,14 +98,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-
             /* =================================================
                EMAIL VALIDATION
             ================================================= */
 
             const emailPattern =
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 
             if (!emailPattern.test(email)) {
 
@@ -126,7 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 return;
             }
-
 
             /* =================================================
                PASSWORD VALIDATION
@@ -142,123 +129,90 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-
             /* =================================================
-               CREATE SELLER
+               BACKEND REGISTRATION
             ================================================= */
 
-            const seller = {
-
-                id: Date.now(),
-
-                name: name,
-
-                email: email,
-
-                password: password,
-
-                storeName: storeName,
-
-                category: category,
-
-                status: "Active",
-
-                submittedAt:
-                    new Date().toLocaleString("en-IN")
-
-            };
-
-
-            /* =================================================
-               GET EXISTING SELLERS
-            ================================================= */
-
-            let sellers =
-                JSON.parse(
-                    localStorage.getItem(
-                        "shopSphereSellerApplications"
-                    )
-                ) || [];
-
-
-            if (!Array.isArray(sellers)) {
-
-                sellers = [];
-
-            }
-
-
-            /* =================================================
-               CHECK DUPLICATE EMAIL
-            ================================================= */
-
-            const existingSeller =
-                sellers.find(
-                    function (existing) {
-
-                        return (
-                            existing.email ===
-                            email
-                        );
-
-                    }
-                );
-
-
-            if (existingSeller) {
+            try {
 
                 showSellerMessage(
-                    "A seller account with this email already exists.",
-                    "error"
+                    "Creating seller account...",
+                    "success"
                 );
 
-                return;
+                const response =
+                    await fetch(
+                        "http://localhost:8080/api/sellers/register",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                password: password,
+                                storeName: storeName,
+                                category: category
+                            })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                /* =================================================
+                   REGISTRATION FAILED
+                ================================================= */
+
+                if (!response.ok) {
+
+                    showSellerMessage(
+                        data.message ||
+                        data ||
+                        "Seller registration failed.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                /* =================================================
+                   REGISTRATION SUCCESS
+                ================================================= */
+
+                showSellerMessage(
+                    "Seller account created successfully! Please login to continue.",
+                    "success"
+                );
+
+                sellerForm.reset();
+
+                /*
+                 * IMPORTANT:
+                 * No automatic redirect here.
+                 *
+                 * Seller must now go to the Seller Login page
+                 * and login using the registered email/password.
+                 */
+
+            } catch (error) {
+
+                console.error(
+                    "Seller registration error:",
+                    error
+                );
+
+                showSellerMessage(
+                    "Unable to connect to the server. Please make sure the backend is running.",
+                    "error"
+                );
             }
-
-
-            /* =================================================
-               SAVE SELLER
-            ================================================= */
-
-            sellers.push(seller);
-
-
-            localStorage.setItem(
-                "shopSphereSellerApplications",
-                JSON.stringify(sellers)
-            );
-
-
-            /* =================================================
-               SAVE CURRENT SELLER
-            ================================================= */
-
-            localStorage.setItem(
-                "shopSphereCurrentSeller",
-                JSON.stringify(seller)
-            );
-
-
-            /* =================================================
-               SUCCESS
-            ================================================= */
-
-            showSellerMessage(
-                "Seller account created successfully!",
-                "success"
-            );
-
-
-            /* =================================================
-               REDIRECT
-            ================================================= */
-
-            sellerForm.reset();
-
-            window.location.href =
-                "seller-dashboard.html";
-
         }
     );
 
 });
+

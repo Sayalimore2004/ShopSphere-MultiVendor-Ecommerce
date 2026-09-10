@@ -1,132 +1,90 @@
 /* =========================================================
    SHOPSPHERE
    REGISTER PAGE JAVASCRIPT
+
+   BACKEND INTEGRATION
+   - Customer Registration
+   - MySQL Persistence
+   - BCrypt Password Handling by Backend
 ========================================================= */
 
+document.addEventListener("DOMContentLoaded", function () {
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+    console.log("REGISTER JS LOADED");
 
-const registerForm =
-    document.getElementById("register-form");
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
-const registerName =
-    document.getElementById("register-name");
+    const registerForm =
+        document.getElementById("register-form");
 
-const registerEmail =
-    document.getElementById("register-email");
+    const registerName =
+        document.getElementById("register-name");
 
-const registerPhone =
-    document.getElementById("register-phone");
+    const registerEmail =
+        document.getElementById("register-email");
 
-const registerPassword =
-    document.getElementById("register-password");
+    const registerPhone =
+        document.getElementById("register-phone");
 
-const registerConfirmPassword =
-    document.getElementById("register-confirm-password");
+    const registerPassword =
+        document.getElementById("register-password");
 
-const registerTerms =
-    document.getElementById("register-terms");
+    const registerConfirmPassword =
+        document.getElementById("register-confirm-password");
 
-const registerMessage =
-    document.getElementById("register-message");
+    const registerTerms =
+        document.getElementById("register-terms");
+
+    const registerMessage =
+        document.getElementById("register-message");
 
 
-/* =========================================================
-   SHOW MESSAGE
-========================================================= */
+    /* =====================================================
+       BACKEND URL
+    ===================================================== */
 
-function showRegisterMessage(message, type) {
+    const API_BASE_URL =
+        "http://localhost:8080/api";
 
-    if (!registerMessage) {
+
+    /* =====================================================
+       SHOW MESSAGE
+    ===================================================== */
+
+    function showRegisterMessage(message, type) {
+
+        if (!registerMessage) {
+            return;
+        }
+
+        registerMessage.textContent = message;
+
+        registerMessage.className =
+            "register-message " + type;
+    }
+
+
+    /* =====================================================
+       REGISTER
+    ===================================================== */
+
+    if (!registerForm) {
         return;
     }
 
-    registerMessage.textContent = message;
-
-    registerMessage.className =
-        "register-message " + type;
-
-}
-
-
-/* =========================================================
-   GET USERS
-========================================================= */
-
-function getRegisteredUsers() {
-
-    const savedUsers =
-        localStorage.getItem("shopSphereUsers");
-
-
-    if (!savedUsers) {
-
-        return [];
-
-    }
-
-
-    try {
-
-        const users =
-            JSON.parse(savedUsers);
-
-
-        if (Array.isArray(users)) {
-
-            return users;
-
-        }
-
-
-        return [];
-
-    } catch (error) {
-
-        console.error(
-            "Error reading users:",
-            error
-        );
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   SAVE USERS
-========================================================= */
-
-function saveRegisteredUsers(users) {
-
-    localStorage.setItem(
-        "shopSphereUsers",
-        JSON.stringify(users)
-    );
-
-}
-
-
-/* =========================================================
-   REGISTER
-========================================================= */
-
-if (registerForm) {
 
     registerForm.addEventListener(
         "submit",
-        function (event) {
+        async function (event) {
 
             event.preventDefault();
 
 
-            /* ---------------------------------------------
+            /* =============================================
                GET VALUES
-            --------------------------------------------- */
+            ============================================= */
 
             const name =
                 registerName.value.trim();
@@ -146,19 +104,16 @@ if (registerForm) {
                 registerConfirmPassword.value;
 
 
-            /* ---------------------------------------------
+            /* =============================================
                CLEAR MESSAGE
-            --------------------------------------------- */
+            ============================================= */
 
-            showRegisterMessage(
-                "",
-                ""
-            );
+            showRegisterMessage("", "");
 
 
-            /* =================================================
+            /* =============================================
                NAME VALIDATION
-            ================================================= */
+            ============================================= */
 
             if (name === "") {
 
@@ -170,7 +125,6 @@ if (registerForm) {
                 registerName.focus();
 
                 return;
-
             }
 
 
@@ -184,13 +138,12 @@ if (registerForm) {
                 registerName.focus();
 
                 return;
-
             }
 
 
-            /* =================================================
+            /* =============================================
                EMAIL VALIDATION
-            ================================================= */
+            ============================================= */
 
             if (email === "") {
 
@@ -202,7 +155,6 @@ if (registerForm) {
                 registerEmail.focus();
 
                 return;
-
             }
 
 
@@ -220,13 +172,12 @@ if (registerForm) {
                 registerEmail.focus();
 
                 return;
-
             }
 
 
-            /* =================================================
+            /* =============================================
                PHONE VALIDATION
-            ================================================= */
+            ============================================= */
 
             if (!/^[0-9]{10}$/.test(phone)) {
 
@@ -238,13 +189,12 @@ if (registerForm) {
                 registerPhone.focus();
 
                 return;
-
             }
 
 
-            /* =================================================
+            /* =============================================
                PASSWORD VALIDATION
-            ================================================= */
+            ============================================= */
 
             if (password.length < 6) {
 
@@ -256,13 +206,12 @@ if (registerForm) {
                 registerPassword.focus();
 
                 return;
-
             }
 
 
-            /* =================================================
+            /* =============================================
                CONFIRM PASSWORD
-            ================================================= */
+            ============================================= */
 
             if (password !== confirmPassword) {
 
@@ -274,13 +223,12 @@ if (registerForm) {
                 registerConfirmPassword.focus();
 
                 return;
-
             }
 
 
-            /* =================================================
+            /* =============================================
                TERMS
-            ================================================= */
+            ============================================= */
 
             if (!registerTerms.checked) {
 
@@ -290,113 +238,143 @@ if (registerForm) {
                 );
 
                 return;
-
             }
 
 
-            /* =================================================
-               GET EXISTING USERS
-            ================================================= */
-
-            const users =
-                getRegisteredUsers();
-
-
-            /* =================================================
-               CHECK DUPLICATE EMAIL
-            ================================================= */
-
-            const existingUser =
-                users.find(
-                    function (user) {
-
-                        return (
-                            user.email &&
-                            user.email.toLowerCase() === email
-                        );
-
-                    }
-                );
-
-
-            if (existingUser) {
-
-                showRegisterMessage(
-                    "An account with this email already exists.",
-                    "error"
-                );
-
-                registerEmail.focus();
-
-                return;
-
-            }
-
-
-            /* =================================================
-               CREATE USER
-            ================================================= */
-
-            const newUser = {
-
-                id:
-                    "user_" +
-                    Date.now(),
-
-                name:
-                    name,
-
-                email:
-                    email,
-
-                phone:
-                    phone,
-
-                password:
-                    password
-
-            };
-
-
-            /* =================================================
-               ADD USER
-            ================================================= */
-
-            users.push(newUser);
-
-
-            /* =================================================
-               SAVE USER
-            ================================================= */
-
-            saveRegisteredUsers(users);
-
-
-            /* =================================================
-               SUCCESS MESSAGE
-            ================================================= */
+            /* =============================================
+               SHOW LOADING MESSAGE
+            ============================================= */
 
             showRegisterMessage(
-                "Account created successfully! Redirecting to login...",
+                "Creating your account...",
                 "success"
             );
 
 
-            /* =================================================
-               REDIRECT TO LOGIN
-            ================================================= */
+            /* =============================================
+               SEND CUSTOMER TO SPRING BOOT
+            ============================================= */
 
-            setTimeout(
-                function () {
+            try {
 
-                    window.location.href =
-                        "login.html";
+                const response =
+                    await fetch(
+                        `${API_BASE_URL}/customers/register`,
+                        {
+                            method: "POST",
 
-                },
-                1200
-            );
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                password: password
+                            })
+                        }
+                    );
+
+
+                /* =========================================
+                   READ RESPONSE
+                ========================================= */
+
+                const contentType =
+                    response.headers.get("content-type") || "";
+
+                let data;
+
+                if (contentType.includes("application/json")) {
+
+                    data =
+                        await response.json();
+
+                } else {
+
+                    data =
+                        await response.text();
+                }
+
+
+                /* =========================================
+                   REGISTRATION FAILED
+                ========================================= */
+
+                if (!response.ok) {
+
+                    let errorMessage =
+                        "Registration failed. Please try again.";
+
+                    if (typeof data === "string" && data.trim() !== "") {
+
+                        errorMessage = data;
+
+                    } else if (
+                        data &&
+                        data.message
+                    ) {
+
+                        errorMessage =
+                            data.message;
+                    }
+
+                    showRegisterMessage(
+                        errorMessage,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                /* =========================================
+                   REGISTRATION SUCCESSFUL
+                ========================================= */
+
+                console.log(
+                    "Customer registered successfully:",
+                    data
+                );
+
+
+                showRegisterMessage(
+                    "Account created successfully! Redirecting to login...",
+                    "success"
+                );
+
+
+                /* =========================================
+                   REDIRECT TO LOGIN
+                ========================================= */
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "login.html";
+
+                    },
+                    1200
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Customer registration error:",
+                    error
+                );
+
+
+                showRegisterMessage(
+                    "Unable to connect to the server. Please make sure the ShopSphere backend is running.",
+                    "error"
+                );
+
+            }
 
         }
     );
 
-}
+});

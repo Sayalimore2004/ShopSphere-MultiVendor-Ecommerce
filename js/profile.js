@@ -1,8 +1,11 @@
-javascript
 /* =========================================================
    SHOPSPHERE
    CUSTOMER PROFILE JAVASCRIPT
+   BACKEND INTEGRATED
 ========================================================= */
+
+const API_BASE_URL =
+    "http://localhost:8080/api";
 
 
 /* =========================================================
@@ -23,53 +26,27 @@ const logoutButton =
 
 
 /* =========================================================
-   GET LOGGED-IN USER
+   LOAD CUSTOMER PROFILE
 ========================================================= */
 
-function getLoggedInUser() {
+async function loadProfile() {
 
-    const savedUser =
+    const token =
+        localStorage.getItem(
+            "shopSphereToken"
+        );
+
+    const savedCustomer =
         localStorage.getItem(
             "shopSphereLoggedInUser"
         );
 
 
-    if (!savedUser) {
-        return null;
-    }
-
-
-    try {
-
-        return JSON.parse(savedUser);
-
-    } catch (error) {
-
-        console.error(
-            "Error reading logged-in user:",
-            error
-        );
-
-        return null;
-    }
-}
-
-
-/* =========================================================
-   LOAD PROFILE
-========================================================= */
-
-function loadProfile() {
-
-    const user =
-        getLoggedInUser();
-
-
     /* -----------------------------------------
-       NO USER LOGGED IN
+       NO TOKEN
     ----------------------------------------- */
 
-    if (!user) {
+    if (!token) {
 
         window.location.href =
             "login.html";
@@ -79,29 +56,156 @@ function loadProfile() {
 
 
     /* -----------------------------------------
-       DISPLAY USER INFORMATION
+       GET CUSTOMER ID
     ----------------------------------------- */
 
-    if (profileName) {
+    let customerId = null;
 
-        profileName.textContent =
-            user.name || "Customer";
+    if (savedCustomer) {
+
+        try {
+
+            const customer =
+                JSON.parse(savedCustomer);
+
+            customerId =
+                customer.id;
+
+        } catch (error) {
+
+            console.error(
+                "Error reading customer information:",
+                error
+            );
+        }
     }
 
 
-    if (profileEmail) {
+    /* -----------------------------------------
+       CUSTOMER ID NOT FOUND
+    ----------------------------------------- */
 
-        profileEmail.textContent =
-            user.email || "";
+    if (!customerId) {
+
+        console.error(
+            "Customer ID not found."
+        );
+
+        window.location.href =
+            "login.html";
+
+        return;
     }
 
 
-    if (profileId) {
+    /* -----------------------------------------
+       GET PROFILE FROM BACKEND
+    ----------------------------------------- */
 
-        profileId.textContent =
-            user.id || "-";
+    try {
+
+        const response =
+            await fetch(
+                API_BASE_URL +
+                "/customers/" +
+                customerId,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+        /* -----------------------------------------
+           UNAUTHORIZED
+        ----------------------------------------- */
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                "shopSphereToken"
+            );
+
+            localStorage.removeItem(
+                "shopSphereLoggedInUser"
+            );
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        /* -----------------------------------------
+           FORBIDDEN
+        ----------------------------------------- */
+
+        if (response.status === 403) {
+
+            alert(
+                "You are not allowed to access this profile."
+            );
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load customer profile."
+            );
+        }
+
+
+        const customer =
+            await response.json();
+
+
+        /* -----------------------------------------
+           DISPLAY PROFILE
+        ----------------------------------------- */
+
+        if (profileName) {
+
+            profileName.textContent =
+                customer.name ||
+                "Customer";
+        }
+
+
+        if (profileEmail) {
+
+            profileEmail.textContent =
+                customer.email ||
+                "";
+        }
+
+
+        if (profileId) {
+
+            profileId.textContent =
+                customer.id ||
+                "-";
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Profile loading error:",
+            error
+        );
+
+        alert(
+            "Unable to load your profile. Please try again."
+        );
     }
-
 }
 
 
@@ -116,16 +220,17 @@ if (logoutButton) {
         function () {
 
             localStorage.removeItem(
+                "shopSphereToken"
+            );
+
+            localStorage.removeItem(
                 "shopSphereLoggedInUser"
             );
 
-
             window.location.href =
                 "login.html";
-
         }
     );
-
 }
 
 
@@ -133,5 +238,12 @@ if (logoutButton) {
    INITIALIZE
 ========================================================= */
 
-loadProfile();
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadProfile();
+
+    }
+);
 

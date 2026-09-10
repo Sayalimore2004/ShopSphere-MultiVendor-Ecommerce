@@ -1,9 +1,17 @@
+
 /* =========================================================
    SHOPSPHERE
    LOGIN PAGE JAVASCRIPT
+
+   BACKEND INTEGRATION
+   - Seller Login
+   - Customer Login
+   - JWT Token Storage
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
+
+    console.log("LOGIN JS LOADED");
 
     const loginForm =
         document.getElementById("login-form");
@@ -22,6 +30,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
+       BACKEND URL
+    ===================================================== */
+
+    const API_BASE_URL =
+        "http://localhost:8080/api";
+
+
+    /* =====================================================
        SHOW MESSAGE
     ===================================================== */
 
@@ -31,78 +47,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        loginMessage.textContent =
-            message;
+        loginMessage.textContent = message;
 
         loginMessage.className =
             "login-message " + type;
-
-    }
-
-
-    /* =====================================================
-       GET SELLERS
-    ===================================================== */
-
-    function getSellers() {
-
-        try {
-
-            const savedSellers =
-                JSON.parse(
-                    localStorage.getItem(
-                        "shopSphereSellerApplications"
-                    )
-                ) || [];
-
-            return Array.isArray(savedSellers)
-                ? savedSellers
-                : [];
-
-        } catch (error) {
-
-            console.error(
-                "Error reading sellers:",
-                error
-            );
-
-            return [];
-
-        }
-
-    }
-
-
-    /* =====================================================
-       GET CUSTOMERS
-    ===================================================== */
-
-    function getUsers() {
-
-        try {
-
-            const savedUsers =
-                JSON.parse(
-                    localStorage.getItem(
-                        "shopSphereUsers"
-                    )
-                ) || [];
-
-            return Array.isArray(savedUsers)
-                ? savedUsers
-                : [];
-
-        } catch (error) {
-
-            console.error(
-                "Error reading users:",
-                error
-            );
-
-            return [];
-
-        }
-
     }
 
 
@@ -114,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         loginForm.addEventListener(
             "submit",
-            function (event) {
+            async function (event) {
 
                 event.preventDefault();
 
@@ -143,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     loginEmail.focus();
 
                     return;
-
                 }
 
 
@@ -157,149 +104,201 @@ document.addEventListener("DOMContentLoaded", function () {
                     loginPassword.focus();
 
                     return;
-
                 }
-
-
-                /* =========================================
-                   CHECK SELLER LOGIN FIRST
-                ========================================= */
-
-                const sellers =
-                    getSellers();
-
-
-                const seller =
-                    sellers.find(
-                        function (item) {
-
-                            return (
-                                item.email &&
-                                item.email.toLowerCase() ===
-                                    email &&
-                                item.password ===
-                                    password
-                            );
-
-                        }
-                    );
-
-
-                if (seller) {
-
-                    /* Save currently logged-in seller */
-
-                    localStorage.setItem(
-                        "shopSphereCurrentSeller",
-                        JSON.stringify(seller)
-                    );
-
-
-                    localStorage.setItem(
-                        "shopSphereUserType",
-                        "seller"
-                    );
-
-
-                    showLoginMessage(
-                        "Seller login successful! Redirecting...",
-                        "success"
-                    );
-
-
-                    setTimeout(
-                        function () {
-
-                            window.location.href =
-                                "seller-dashboard.html";
-
-                        },
-                        700
-                    );
-
-
-                    return;
-
-                }
-
-
-                /* =========================================
-                   CHECK CUSTOMER LOGIN
-                ========================================= */
-
-                const users =
-                    getUsers();
-
-
-                const user =
-                    users.find(
-                        function (item) {
-
-                            return (
-                                item.email &&
-                                item.email.toLowerCase() ===
-                                    email &&
-                                item.password ===
-                                    password
-                            );
-
-                        }
-                    );
-
-
-                if (!user) {
-
-                    showLoginMessage(
-                        "Invalid email or password.",
-                        "error"
-                    );
-
-                    return;
-
-                }
-
-
-                /* Save logged-in customer */
-
-                const loggedInUser = {
-
-                    id: user.id,
-
-                    name: user.name,
-
-                    email: user.email
-
-                };
-
-
-                localStorage.setItem(
-                    "shopSphereLoggedInUser",
-                    JSON.stringify(
-                        loggedInUser
-                    )
-                );
-
-
-                localStorage.setItem(
-                    "shopSphereUserType",
-                    "customer"
-                );
 
 
                 showLoginMessage(
-                    "Login successful! Redirecting...",
+                    "Logging in...",
                     "success"
                 );
 
 
-                setTimeout(
-                    function () {
+                /* =========================================
+                   TRY SELLER LOGIN
+                ========================================= */
 
-                        window.location.href =
-                            "../index.html";
+                try {
 
-                    },
-                    700
+                    const sellerResponse =
+                        await fetch(
+                            `${API_BASE_URL}/sellers/login`,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    email: email,
+                                    password: password
+                                })
+                            }
+                        );
+
+
+                    if (sellerResponse.ok) {
+
+                        const data =
+                            await sellerResponse.json();
+
+
+                        /* Save JWT token */
+
+                        localStorage.setItem(
+                            "shopSphereToken",
+                            data.token
+                        );
+
+
+                        /* Save logged-in seller */
+
+                        localStorage.setItem(
+                            "shopSphereCurrentSeller",
+                            JSON.stringify(
+                                data.seller
+                            )
+                        );
+
+
+                        localStorage.setItem(
+                            "shopSphereUserType",
+                            "seller"
+                        );
+
+
+                        showLoginMessage(
+                            "Seller login successful! Redirecting...",
+                            "success"
+                        );
+
+
+                        setTimeout(
+                            function () {
+
+                                window.location.href =
+                                    "seller-dashboard.html";
+
+                            },
+                            700
+                        );
+
+
+                        return;
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Seller login error:",
+                        error
+                    );
+
+                }
+
+
+                /* =========================================
+                   TRY CUSTOMER LOGIN
+                ========================================= */
+
+                try {
+
+                    const customerResponse =
+                        await fetch(
+                            `${API_BASE_URL}/customers/login`,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    email: email,
+                                    password: password
+                                })
+                            }
+                        );
+
+
+                    if (customerResponse.ok) {
+
+                        const data =
+                            await customerResponse.json();
+
+
+                        /* Save JWT token */
+
+                        localStorage.setItem(
+                            "shopSphereToken",
+                            data.token
+                        );
+
+
+                        /* Save logged-in customer */
+
+                        localStorage.setItem(
+                            "shopSphereLoggedInUser",
+                            JSON.stringify(
+                                data.customer
+                            )
+                        );
+
+
+                        localStorage.setItem(
+                            "shopSphereUserType",
+                            "customer"
+                        );
+
+
+                        /* Remove old seller session */
+
+                        localStorage.removeItem(
+                            "shopSphereCurrentSeller"
+                        );
+
+
+                        showLoginMessage(
+                            "Login successful! Redirecting...",
+                            "success"
+                        );
+
+
+                        setTimeout(
+                            function () {
+
+                                window.location.href =
+                                    "../index.html";
+
+                            },
+                            700
+                        );
+
+
+                        return;
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Customer login error:",
+                        error
+                    );
+
+                }
+
+
+                /* =========================================
+                   INVALID LOGIN
+                ========================================= */
+
+                showLoginMessage(
+                    "Invalid email or password.",
+                    "error"
                 );
 
             }
@@ -330,3 +329,4 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+

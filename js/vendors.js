@@ -33,15 +33,12 @@ if (sellerSearch && sellerGrid) {
                     .trim()
                     .toLowerCase();
 
-
             const sellerCards =
                 sellerGrid.querySelectorAll(
                     ".seller-card"
                 );
 
-
             let visibleCount = 0;
-
 
             sellerCards.forEach(
                 function (card) {
@@ -51,13 +48,9 @@ if (sellerSearch && sellerGrid) {
                             .toLowerCase()
                             .trim();
 
-
                     const matches =
                         searchText === "" ||
-                        cardText.includes(
-                            searchText
-                        );
-
+                        cardText.includes(searchText);
 
                     if (matches) {
 
@@ -106,69 +99,6 @@ if (sellerSearch && sellerGrid) {
     );
 
 }
-
-
-/* =========================================================
-   VISIT STORE LINKS
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const storeLinks =
-            document.querySelectorAll(
-                ".seller-button-small"
-            );
-
-
-        storeLinks.forEach(
-            function (link) {
-
-                link.addEventListener(
-                    "click",
-                    function (event) {
-
-                        /*
-                         * The href already contains:
-                         *
-                         * products.html?seller=Store Name
-                         *
-                         * So we simply allow the normal
-                         * navigation to happen.
-                         */
-
-                        const url =
-                            new URL(
-                                link.href,
-                                window.location.href
-                            );
-
-
-                        const seller =
-                            url.searchParams.get(
-                                "seller"
-                            );
-
-
-                        if (!seller) {
-
-                            event.preventDefault();
-
-                            console.error(
-                                "Seller name missing from store link."
-                            );
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-    }
-);
 
 
 /* =========================================================
