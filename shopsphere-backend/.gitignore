@@ -40,3 +40,6 @@ build/
 # Local application configuration
 application-local.properties
 application-secret.properties
+
+# Local application configuration
+application.properties
